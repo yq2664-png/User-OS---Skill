@@ -3,7 +3,12 @@ import cors from 'cors';
 import multer from 'multer';
 import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 dotenv.config();
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -199,4 +204,14 @@ Generate a focused PRD. Return ONLY valid JSON:
 Generate 5-6 sections. Each must address a distinct need from the insights. No filler — every section must be actionable.`;
 }
 
-app.listen(3001, () => console.log('API running on http://localhost:3001'));
+// Serve frontend in production
+const distPath = join(__dirname, 'dist');
+if (existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(join(distPath, 'index.html'));
+  });
+}
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
