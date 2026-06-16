@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-zinc-900 font-sans;
+  }
+
+  ::selection {
+    @apply bg-zinc-900 text-white;
+  }
+
+  input, textarea {
+    @apply outline-none;
+  }
+}
+
+@layer components {
+  .page-container {
+    @apply max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-16;
+  }
+
+  .label-tag {
+    @apply font-mono text-[10px] tracking-[0.2em] uppercase text-zinc-400;
+  }
+
+  .section-title {
+    @apply text-xs font-mono tracking-[0.15em] uppercase text-zinc-400 mb-8;
+  }
+
+  .divider {
+    @apply border-t border-zinc-100;
+  }
+
+  .card-enter {
+    opacity: 0;
+    animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-zinc-900 text-white text-sm font-medium px-6 py-3
+           hover:bg-zinc-700 transition-colors duration-150 cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 border border-zinc-200 text-zinc-900 text-sm font-medium px-6 py-3
+           hover:border-zinc-400 transition-colors duration-150 cursor-pointer;
+  }
+
+  .input-field {
+    @apply w-full border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900
+           placeholder-zinc-300 focus:border-zinc-900 transition-colors duration-150;
+  }
+
+  .thinking-dot {
+    @apply w-1.5 h-1.5 bg-zinc-400 rounded-full;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* Perspective card hover lift */
+  .perspective-card {
+    @apply transition-transform duration-200 ease-out;
+  }
+  .perspective-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes progress {
+  from { width: 0%; }
+  to { width: var(--target-width); }
+}
+
+.loading-bar {
+  background: linear-gradient(90deg, #f4f4f5 25%, #e4e4e7 50%, #f4f4f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
