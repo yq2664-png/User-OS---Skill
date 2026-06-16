@@ -48,8 +48,7 @@ export default function LandingPage({ onStart }: Props) {
     <main>
 
       {/* ── Hero ──────────────────────────────────────────────── */}
-      <section className="page-container pt-24 pb-28 sm:pt-32 sm:pb-36 border-b border-zinc-100">
-        <p className="label-tag mb-8">User Perspective Simulator</p>
+      <section className="page-container pt-20 pb-16 sm:pt-28 sm:pb-20 border-b border-zinc-100">
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-light text-zinc-900 leading-[1.05] tracking-tight max-w-4xl mb-8">
           Know what your users<br />
           actually think.
@@ -70,7 +69,7 @@ export default function LandingPage({ onStart }: Props) {
       </section>
 
       {/* ── How it works ──────────────────────────────────────── */}
-      <section className="page-container py-24 sm:py-32 border-b border-zinc-100">
+      <section className="page-container py-14 sm:py-20 border-b border-zinc-100">
         <p className="section-title">How it works</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px border border-zinc-100">
           {STEPS.map((step) => (
@@ -89,7 +88,7 @@ export default function LandingPage({ onStart }: Props) {
       </section>
 
       {/* ── Features ──────────────────────────────────────────── */}
-      <section className="page-container py-24 sm:py-32 border-b border-zinc-100">
+      <section className="page-container py-14 sm:py-20 border-b border-zinc-100">
         <p className="section-title">What you get</p>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-px border border-zinc-100">
           {FEATURES.map((f) => (
@@ -103,7 +102,7 @@ export default function LandingPage({ onStart }: Props) {
       </section>
 
       {/* ── Bottom CTA ────────────────────────────────────────── */}
-      <section className="page-container py-24 sm:py-32">
+      <section className="page-container py-14 sm:py-20">
         <div className="max-w-xl">
           <h2 className="text-3xl sm:text-4xl font-light text-zinc-900 leading-tight mb-6">
             Ready to see your product<br />through user eyes?

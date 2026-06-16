@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Card, Insights, InsightItem, ImpactLevel } from '../App';
+import { encodeShare } from '../utils/shareLink';
+import LoadingModal from '../components/LoadingModal';
 
 interface Props {
   productName: string;
@@ -17,32 +19,35 @@ const SECTIONS: { key: keyof Insights; label: string; description: string }[] = 
   { key: 'opportunities',    label: 'Opportunity Areas',     description: 'Where investment creates the most value'  },
 ];
 
-const IMPACT_CONFIG: Record<ImpactLevel, { marker: string; textColor: string; barColor: string; bg: string }> = {
-  Critical: { marker: '■', textColor: 'text-zinc-900',  barColor: 'bg-zinc-900',  bg: 'bg-zinc-900'  },
-  High:     { marker: '●', textColor: 'text-zinc-700',  barColor: 'bg-zinc-700',  bg: 'bg-zinc-700'  },
-  Medium:   { marker: '○', textColor: 'text-zinc-500',  barColor: 'bg-zinc-400',  bg: 'bg-zinc-400'  },
-  Low:      { marker: '–', textColor: 'text-zinc-400',  barColor: 'bg-zinc-200',  bg: 'bg-zinc-200'  },
+const IMPACT_STARS: Record<ImpactLevel, number> = {
+  Critical: 4,
+  High:     3,
+  Medium:   2,
+  Low:      1,
 };
+
+const IMPACT_COLOR: Record<ImpactLevel, string> = {
+  Critical: '#ef4444',
+  High:     '#f59e0b',
+  Medium:   '#eab308',
+  Low:      '#22c55e',
+};
+
+function Stars({ level }: { level: ImpactLevel }) {
+  const count = IMPACT_STARS[level] ?? 2;
+  return (
+    <span className="inline-flex items-center gap-0.5">
+      {[1, 2, 3, 4].map(i => (
+        <span key={i} className={i <= count ? 'text-zinc-900' : 'text-zinc-200'}>★</span>
+      ))}
+    </span>
+  );
+}
 
 const IMPACT_ORDER: ImpactLevel[] = ['Critical', 'High', 'Medium', 'Low'];
 
 function itemKey(sectionKey: string, rank: number) {
   return `${sectionKey}-${rank}`;
-}
-
-function ScoreBar({ score }: { score: number }) {
-  const pct = Math.round((score / 10) * 100);
-  return (
-    <div className="flex items-center gap-2 mt-1.5">
-      <div className="flex-1 h-px bg-zinc-100">
-        <div
-          className="h-px bg-zinc-900 transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span className="font-mono text-[10px] text-zinc-300 shrink-0 w-6 text-right">{pct}%</span>
-    </div>
-  );
 }
 
 function InsightRow({
@@ -59,19 +64,21 @@ function InsightRow({
   animDelay: number;
 }) {
   const impact: ImpactLevel = item.impact ?? 'Medium';
-  const cfg = IMPACT_CONFIG[impact] ?? IMPACT_CONFIG['Medium'];
-  const rawScore = item.score ?? (item.rank ? Math.max(4, 10 - (item.rank - 1) * 1.5) : 5);
-  const score = typeof rawScore === 'number' ? rawScore : parseFloat(String(rawScore));
+
+  const color = IMPACT_COLOR[impact];
 
   return (
     <div
-      className={`card-enter border-b border-zinc-100 last:border-0 py-5 flex gap-4 transition-opacity duration-150 group ${selected ? 'opacity-100' : 'opacity-40'}`}
+      className={`card-enter border-b border-zinc-100 last:border-0 py-5 flex gap-0 transition-opacity duration-150 ${selected ? 'opacity-100' : 'opacity-40'}`}
       style={{ animationDelay: `${animDelay}ms` }}
     >
+      {/* Priority color bar */}
+      <div className="w-[3px] shrink-0 mr-5 rounded-full self-stretch" style={{ background: color }} />
+
       {/* Checkbox */}
       <button
         onClick={onToggle}
-        className="shrink-0 mt-0.5 w-4 h-4 border transition-colors duration-150 flex items-center justify-center"
+        className="shrink-0 mt-0.5 w-4 h-4 border transition-colors duration-150 flex items-center justify-center mr-4"
         style={{ borderColor: selected ? '#18181b' : '#d4d4d8', background: selected ? '#18181b' : 'white' }}
         title={selected ? 'Deselect' : 'Select'}
       >
@@ -82,25 +89,11 @@ function InsightRow({
         )}
       </button>
 
-      {/* Score column */}
-      <div className="shrink-0 w-14 pt-0.5">
-        <div className="flex items-baseline gap-0.5">
-          <span className="font-mono text-xl font-semibold text-zinc-900 leading-none">
-            {score.toFixed(1)}
-          </span>
-          <span className="font-mono text-[9px] text-zinc-300">/10</span>
-        </div>
-        <ScoreBar score={score} />
-      </div>
-
-      {/* Content column */}
+      {/* Content */}
       <div className="flex-1 min-w-0 pt-0.5">
         <div className="flex items-start justify-between gap-3 mb-1.5">
           <p className="text-sm font-medium text-zinc-900 leading-snug">{item.title}</p>
-          <span className={`shrink-0 flex items-center gap-1 font-mono text-[9px] tracking-widest uppercase ${cfg.textColor}`}>
-            <span>{cfg.marker}</span>
-            {impact}
-          </span>
+          <span className="font-mono text-[9px] tracking-widest uppercase shrink-0" style={{ color }}>{impact}</span>
         </div>
         <p className="text-sm text-zinc-500 font-light leading-relaxed mb-2">{item.description}</p>
         {item.valueNote && (
@@ -129,14 +122,12 @@ function ImpactGroup({
   baseDelay: number;
 }) {
   if (!items.length) return null;
-  const cfg = IMPACT_CONFIG[level];
   return (
     <div className="mb-2">
       {/* Group label */}
       <div className="flex items-center gap-2 py-2 mb-1">
-        <span className={`font-mono text-[9px] tracking-[0.2em] uppercase ${cfg.textColor}`}>
-          {cfg.marker} {level}
-        </span>
+        <Stars level={level} />
+        <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-zinc-400">{level}</span>
         <div className="flex-1 h-px bg-zinc-100" />
         <span className="font-mono text-[9px] text-zinc-300">{items.length}</span>
       </div>
@@ -216,7 +207,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
 
   function copyShareLink() {
     if (!insights) return;
-    const payload = btoa(JSON.stringify({ insights, productName }));
+    const payload = encodeShare({ insights, productName });
     const url = `${window.location.origin}/#insights=${payload}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
@@ -274,8 +265,8 @@ export default function InsightPage({ productName, cards, insights, setInsights,
         write(level.toUpperCase(), 7, 'bold', [200, 200, 200], 2);
         for (const item of group) {
           if (y > 260) { doc.addPage(); y = margin; }
-          const score = typeof item.score === 'number' ? item.score : parseFloat(String(item.score));
-          write(`${score.toFixed(1)}  ${item.title}`, 10, 'bold', [20, 20, 20], 1);
+          const stars = '★'.repeat(IMPACT_STARS[item.impact ?? 'Medium'] ?? 2) + '☆'.repeat(4 - (IMPACT_STARS[item.impact ?? 'Medium'] ?? 2));
+          write(`${stars}  ${item.title}`, 10, 'bold', [20, 20, 20], 1);
           write(item.description, 9, 'normal', [90, 90, 90], 1);
           if (item.valueNote) write(item.valueNote, 8, 'normal', [150, 150, 150], 4);
           else y += 2;
@@ -299,13 +290,17 @@ export default function InsightPage({ productName, cards, insights, setInsights,
   const criticalCount = insights
     ? SECTIONS.reduce((sum, s) => sum + (insights[s.key] ?? []).filter(i => (i.impact ?? 'Medium') === 'Critical').length, 0)
     : 0;
-  const avgScore = insights && totalInsights > 0
-    ? (SECTIONS.reduce((sum, s) =>
-        sum + (insights[s.key] ?? []).reduce((a, i) => a + (typeof i.score === 'number' ? i.score : parseFloat(String(i.score))), 0), 0
-      ) / totalInsights).toFixed(1)
-    : null;
+
+  const insightSteps = [
+    { label: 'Reading user perspectives', sublabel: 'Processing all collected feedback' },
+    { label: 'Identifying patterns', sublabel: 'Finding recurring themes and friction' },
+    { label: 'Scoring issues', sublabel: 'Ranking by frequency and business impact' },
+    { label: 'Surfacing opportunities', sublabel: 'Mapping gaps to product potential' },
+  ];
 
   return (
+    <>
+      <LoadingModal visible={loading} steps={insightSteps} />
     <main className="page-container py-20 sm:py-28">
 
       {/* Header */}
@@ -328,34 +323,17 @@ export default function InsightPage({ productName, cards, insights, setInsights,
         )}
       </div>
 
-      {/* Summary stats bar */}
+      {/* Summary stats + legend */}
       {insights && !loading && (
-        <div className="grid grid-cols-3 border border-zinc-100 mb-12">
-          {[
-            { label: 'Insights', value: totalInsights },
-            { label: 'Critical', value: criticalCount },
-            { label: 'Avg score', value: avgScore ?? '—' },
-          ].map(stat => (
-            <div key={stat.label} className="px-6 py-4 border-r border-zinc-100 last:border-0">
-              <p className="text-2xl font-light text-zinc-900 mb-0.5">{stat.value}</p>
-              <p className="label-tag">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Impact legend */}
-      {insights && !loading && (
-        <div className="flex items-center gap-5 mb-10 pb-6 border-b border-zinc-100">
-          <span className="label-tag">Impact</span>
-          {IMPACT_ORDER.map(level => {
-            const cfg = IMPACT_CONFIG[level];
-            return (
-              <span key={level} className={`flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase ${cfg.textColor}`}>
-                {cfg.marker} {level}
+        <div className="flex items-center gap-6 mb-10 pb-6 border-b border-zinc-100">
+          <div className="flex items-center gap-5">
+            <span className="font-mono text-[9px] tracking-widest uppercase text-zinc-300">{totalInsights} insights</span>
+            {criticalCount > 0 && (
+              <span className="flex items-center gap-1 font-mono text-[9px] tracking-widest uppercase text-zinc-500">
+                <Stars level="Critical" /> {criticalCount} critical
               </span>
-            );
-          })}
+            )}
+          </div>
           <div className="flex-1" />
           <button
             onClick={allSelected ? () => setSelected(new Set()) : selectAll}
@@ -411,21 +389,19 @@ export default function InsightPage({ productName, cards, insights, setInsights,
                   <h2 className="text-sm font-medium tracking-wide text-zinc-900">{section.label}</h2>
                   <span className="text-xs text-zinc-400 font-light hidden sm:block">{section.description}</span>
                 </div>
-                {/* Grouped by impact */}
-                {IMPACT_ORDER.map((level, li) => {
-                  const group = allItems.filter(i => (i.impact ?? 'Medium') === level);
-                  return (
-                    <ImpactGroup
-                      key={level}
-                      level={level}
-                      items={group}
+                {/* Sorted by urgency */}
+                {[...allItems]
+                  .sort((a, b) => IMPACT_ORDER.indexOf(a.impact ?? 'Medium') - IMPACT_ORDER.indexOf(b.impact ?? 'Medium'))
+                  .map((item, i) => (
+                    <InsightRow
+                      key={item.rank}
+                      item={item}
                       sectionKey={section.key}
-                      selected={selected}
-                      onToggle={toggleItem}
-                      baseDelay={si * 40 + li * 20}
+                      selected={selected.has(itemKey(section.key, item.rank))}
+                      onToggle={() => toggleItem(itemKey(section.key, item.rank))}
+                      animDelay={si * 40 + i * 40}
                     />
-                  );
-                })}
+                  ))}
               </div>
             );
           })}
@@ -473,5 +449,6 @@ export default function InsightPage({ productName, cards, insights, setInsights,
         </div>
       )}
     </main>
+    </>
   );
 }

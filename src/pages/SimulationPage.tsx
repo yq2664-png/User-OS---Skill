@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Card, FormData } from '../App';
+import type { Card, FormData, RealCard } from '../App';
+import LoadingModal from '../components/LoadingModal';
 
 const EMOTION_COLOR: Record<string, string> = {
   Excited: 'text-zinc-600',
@@ -51,7 +52,7 @@ function PersonaCard({
 
   return (
     <div
-      className={`card-enter perspective-card bg-white p-8 lg:p-9 relative group ${EMOTION_BORDER[card.emotion] ?? 'border-l border-l-zinc-200'}`}
+      className={`card-enter perspective-card bg-white p-8 lg:p-9 relative group transition-all duration-200 ${hovered ? 'scale-[1.03] z-10 outline outline-2 outline-zinc-900' : 'outline outline-2 outline-transparent'}`}
       style={{ animationDelay: `${index * 80}ms` }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -109,20 +110,83 @@ interface Props {
   onNext: () => void;
 }
 
+const SENTIMENT_BORDER: Record<string, string> = {
+  positive: 'border-l-[3px] border-l-zinc-300',
+  neutral:  'border-l-2 border-l-zinc-200',
+  negative: 'border-l-[3px] border-l-zinc-700',
+};
+
+function RealCardItem({ card, index }: { card: RealCard; index: number }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className={`card-enter bg-white p-8 lg:p-9 relative transition-all duration-200 ${hovered ? 'scale-[1.03] z-10 outline outline-2 outline-zinc-900' : 'outline outline-2 outline-transparent'}`}
+      style={{ animationDelay: `${index * 60}ms` }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex items-center justify-between mb-5">
+        <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-zinc-400">{card.persona}</span>
+        <span className="font-mono text-[10px] tracking-[0.12em] uppercase text-zinc-400">{card.source}</span>
+      </div>
+      <p className="text-lg sm:text-xl leading-relaxed font-light">
+        "<HighlightedThought thought={card.quote} highlight={card.highlight} />"
+      </p>
+    </div>
+  );
+}
+
 export default function SimulationPage({ formData, cards, setCards, onNext }: Props) {
   const [streaming, setStreaming] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [done, setDone] = useState(cards.length > 0);
   const [error, setError] = useState('');
+  const [realCards, setRealCards] = useState<RealCard[]>([]);
+  const [realLoading, setRealLoading] = useState(false);
+  const [realError, setRealError] = useState('');
   const bufferRef = useRef('');
   const cardsRef = useRef<Card[]>(cards);
   const startedRef = useRef(false);
+  const realStartedRef = useRef(false);
+
+  const showReal = formData.productStage === 'web' || formData.productStage === 'client';
 
   useEffect(() => {
     if (startedRef.current || cards.length > 0) return;
     startedRef.current = true;
     runSimulation();
   }, []);
+
+  // Fetch real perspectives for web/client products once simulation starts
+  useEffect(() => {
+    if (!showReal || realStartedRef.current || realCards.length > 0) return;
+    realStartedRef.current = true;
+    fetchRealPerspectives();
+  }, [showReal]);
+
+  async function fetchRealPerspectives() {
+    setRealLoading(true);
+    setRealError('');
+    try {
+      const res = await fetch('/api/real-perspectives', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: formData.productName,
+          webLink: formData.webLink,
+          productStage: formData.productStage,
+        }),
+      });
+      if (!res.ok) throw new Error(`Server returned ${res.status} — make sure the backend is running (npm run dev)`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setRealCards(data.cards ?? []);
+    } catch (e: any) {
+      setRealError(e.message || 'Could not load real perspectives.');
+    } finally {
+      setRealLoading(false);
+    }
+  }
 
   async function runSimulation(more = false) {
     if (more) {
@@ -137,8 +201,11 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
 
     const body = new FormData();
     body.append('productName', formData.productName);
+    body.append('productStage', formData.productStage);
     body.append('productType', formData.productType);
     body.append('coreFunctions', formData.coreFunctions);
+    body.append('requirements', formData.requirements);
+    body.append('webLink', formData.webLink);
     body.append('featureConstraints', JSON.stringify(formData.featureConstraints));
     body.append('timeConstraints', JSON.stringify(formData.timeConstraints));
     if (more) {
@@ -216,7 +283,17 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
 
   const isLoading = streaming || loadingMore;
 
+  const simProgress = Math.round((cards.length / 8) * 100);
+  const simSteps = [
+    { label: 'Analyzing your product', sublabel: 'Reading description and stage' },
+    { label: 'Building user personas', sublabel: 'Defining diverse user profiles' },
+    { label: 'Simulating perspectives', sublabel: 'Generating authentic reactions' },
+    { label: 'Adding background detail', sublabel: 'Enriching each user profile' },
+  ];
+
   return (
+    <>
+      <LoadingModal visible={streaming} steps={simSteps} progress={simProgress} />
     <main className="page-container py-20 sm:py-28">
 
       {/* Header */}
@@ -254,7 +331,71 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
         </div>
       )}
 
-      {/* Cards grid */}
+      {/* Real Perspectives Section — shown first */}
+      {showReal && (
+        <div className="mb-20">
+          <div className="flex items-baseline gap-4 mb-3">
+            <h2 className="text-2xl font-light text-zinc-900">Real User Voices</h2>
+            <span className="font-mono text-[9px] tracking-widest uppercase text-zinc-400">From the web</span>
+          </div>
+          <p className="text-sm text-zinc-400 font-light mb-8">
+            Real feedback found online for {formData.productName}
+          </p>
+
+          {realLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-zinc-100">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="bg-zinc-50 p-8">
+                  <div className="flex justify-between mb-4">
+                    <div className="loading-bar h-2 w-20 rounded" />
+                    <div className="loading-bar h-2 w-14 rounded" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="loading-bar h-2.5 w-full rounded" />
+                    <div className="loading-bar h-2.5 w-5/6 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {realError && (
+            <div className="flex items-start gap-4 p-6 bg-zinc-50">
+              <span className="text-zinc-300 mt-0.5 shrink-0">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
+                  <path d="M7 4v3.5M7 10h.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                </svg>
+              </span>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Could not load real perspectives — the backend server may not be running. Start it with <code className="font-mono bg-zinc-100 px-1 py-0.5 rounded text-zinc-600">npm run dev</code>.
+              </p>
+            </div>
+          )}
+
+          {!realLoading && realCards.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-zinc-100">
+              {realCards.map((card, i) => (
+                <RealCardItem key={i} card={card} index={i} />
+              ))}
+            </div>
+          )}
+
+          {!realLoading && !realError && realCards.length === 0 && (
+            <p className="text-sm text-zinc-300 border border-zinc-100 p-6">
+              No real user reviews found online for this product.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Simulated Perspectives */}
+      {showReal && (cards.length > 0 || streaming) && (
+        <div className="flex items-baseline gap-4 mb-3">
+          <h2 className="text-2xl font-light text-zinc-900">Simulated Perspectives</h2>
+          <span className="font-mono text-[9px] tracking-widest uppercase text-zinc-400">AI-generated</span>
+        </div>
+      )}
       {(cards.length > 0 || streaming) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-zinc-100">
           {cards.map((card, i) => (
@@ -327,5 +468,6 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
         </div>
       )}
     </main>
+    </>
   );
 }

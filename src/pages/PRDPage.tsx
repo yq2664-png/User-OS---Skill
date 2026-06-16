@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { encodeShare } from '../utils/shareLink';
 import type { Insights, PRDData, PRDSection } from '../App';
+import LoadingModal from '../components/LoadingModal';
 
 interface Props {
   productName: string;
@@ -10,24 +12,47 @@ interface Props {
 
 const COL_HEADERS = ['Problem', 'User Story', 'Requirement', 'Success Metric'];
 
+const PRIORITY_ORDER = ['Critical', 'High', 'Medium', 'Low'] as const;
+const PRIORITY_COLOR: Record<string, string> = {
+  Critical: '#ef4444',
+  High:     '#f59e0b',
+  Medium:   '#eab308',
+  Low:      '#22c55e',
+};
+
 function PRDRow({ section, index }: { section: PRDSection; index: number }) {
   const cells = [section.problem, section.userStory, section.requirement, section.successMetric];
+  const color = PRIORITY_COLOR[section.priority] ?? '#d4d4d8';
   return (
     <div
-      className="card-enter grid grid-cols-1 lg:grid-cols-4 border-b border-zinc-100"
+      className="card-enter border-b border-zinc-100 last:border-0 flex"
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      {/* Row number — mobile hidden, desktop shown as first item */}
-      {cells.map((cell, ci) => (
-        <div
-          key={ci}
-          className={`p-6 ${ci < cells.length - 1 ? 'lg:border-r lg:border-zinc-100' : ''} ${ci > 0 ? 'border-t lg:border-t-0 border-zinc-100' : ''}`}
-        >
-          {/* Mobile label */}
-          <p className="label-tag mb-2 lg:hidden">{COL_HEADERS[ci]}</p>
-          <p className="text-sm text-zinc-700 font-light leading-relaxed">{cell}</p>
+      {/* Priority color bar */}
+      <div className="w-[3px] shrink-0" style={{ background: color }} />
+
+      <div className="flex-1 min-w-0">
+        {/* Row name + priority label */}
+        <div className="flex items-center justify-between gap-4 px-6 pt-5 pb-3 border-b border-zinc-50">
+          <span className="text-sm font-medium text-zinc-900">{section.name || `Requirement ${section.id}`}</span>
+          <span className="font-mono text-[9px] tracking-widest uppercase shrink-0" style={{ color }}>
+            {section.priority}
+          </span>
         </div>
-      ))}
+
+        {/* 4-column content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4">
+          {cells.map((cell, ci) => (
+            <div
+              key={ci}
+              className={`p-6 ${ci < cells.length - 1 ? 'lg:border-r lg:border-zinc-100' : ''} ${ci > 0 ? 'border-t lg:border-t-0 border-zinc-100' : ''}`}
+            >
+              <p className="label-tag mb-2 lg:hidden">{COL_HEADERS[ci]}</p>
+              <p className="text-sm text-zinc-700 font-light leading-relaxed">{cell}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -35,7 +60,18 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
 export default function PRDPage({ productName, insights, prdData, setPrdData }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
   const startedRef = useRef(false);
+
+  function copyShareLink() {
+    if (!prdData) return;
+    const payload = encodeShare({ prdData, productName });
+    const url = `${window.location.origin}/#prd=${payload}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   useEffect(() => {
     if (startedRef.current || prdData) return;
@@ -140,7 +176,16 @@ export default function PRDPage({ productName, insights, prdData, setPrdData }: 
     doc.save(`${productName.replace(/\s+/g, '-').toLowerCase()}-prd.pdf`);
   }
 
+  const prdSteps = [
+    { label: 'Reading research insights', sublabel: 'Analyzing patterns and priorities' },
+    { label: 'Defining problems', sublabel: 'Translating findings into problem statements' },
+    { label: 'Writing requirements', sublabel: 'Crafting testable product requirements' },
+    { label: 'Setting success metrics', sublabel: 'Defining measurable outcomes' },
+  ];
+
   return (
+    <>
+      <LoadingModal visible={loading} steps={prdSteps} />
     <main className="page-container py-20 sm:py-28">
       {/* Header */}
       <div className="mb-16">
@@ -213,9 +258,11 @@ export default function PRDPage({ productName, insights, prdData, setPrdData }: 
           </div>
 
           <div className="border border-zinc-100">
-            {prdData.sections.map((section, i) => (
-              <PRDRow key={i} section={section} index={i} />
-            ))}
+            {[...prdData.sections]
+              .sort((a, b) => PRIORITY_ORDER.indexOf(a.priority) - PRIORITY_ORDER.indexOf(b.priority))
+              .map((section, i) => (
+                <PRDRow key={section.id} section={section} index={i} />
+              ))}
           </div>
         </div>
       )}
@@ -226,14 +273,23 @@ export default function PRDPage({ productName, insights, prdData, setPrdData }: 
           <p className="text-sm text-zinc-400 font-light">
             Based on research from {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
-          <button onClick={exportPDF} className="btn-primary">
-            Export as PDF
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5M1 11h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3">
+<button onClick={copyShareLink} className="btn-secondary">
+              {copied
+                ? <><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 7l3 3 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>Link copied</>
+                : <><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5 7.5a3 3 0 004.24 0l2-2a3 3 0 00-4.24-4.24l-1 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /><path d="M8 5.5a3 3 0 00-4.24 0l-2 2a3 3 0 004.24 4.24l1-1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>Copy link to share</>
+              }
+            </button>
+            <button onClick={exportPDF} className="btn-primary">
+              Export as PDF
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5M1 11h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </main>
+    </>
   );
 }

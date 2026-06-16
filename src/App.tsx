@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { decodeShare } from './utils/shareLink';
 import LandingPage from './pages/LandingPage';
 import InputPage from './pages/InputPage';
 import SimulationPage from './pages/SimulationPage';
@@ -6,6 +7,7 @@ import InsightPage from './pages/InsightPage';
 import PRDPage from './pages/PRDPage';
 
 export type Page = 'landing' | 'input' | 'simulation' | 'insights' | 'prd';
+export type ProductStage = 'unpublished' | 'web' | 'client';
 
 export interface FeatureConstraint {
   module: string;
@@ -19,8 +21,11 @@ export interface TimeConstraint {
 
 export interface FormData {
   productName: string;
+  productStage: ProductStage | '';
   productType: string;
   coreFunctions: string;
+  webLink: string;
+  requirements: string;
   featureConstraints: FeatureConstraint[];
   timeConstraints: TimeConstraint[];
   screenshots: File[];
@@ -40,6 +45,14 @@ export interface Card {
   thought: string;
   highlight?: string;
   background?: CardBackground;
+}
+
+export interface RealCard {
+  source: string;
+  persona: string;
+  quote: string;
+  highlight?: string;
+  sentiment: 'positive' | 'neutral' | 'negative';
 }
 
 export type ImpactLevel = 'Critical' | 'High' | 'Medium' | 'Low';
@@ -63,6 +76,8 @@ export interface Insights {
 
 export interface PRDSection {
   id: number;
+  name: string;
+  priority: 'Critical' | 'High' | 'Medium' | 'Low';
   problem: string;
   userStory: string;
   requirement: string;
@@ -78,8 +93,11 @@ export default function App() {
   const [page, setPage] = useState<Page>('landing');
   const [formData, setFormData] = useState<FormData>({
     productName: '',
+    productStage: '',
     productType: '',
     coreFunctions: '',
+    webLink: '',
+    requirements: '',
     featureConstraints: [],
     timeConstraints: [],
     screenshots: [],
@@ -89,16 +107,26 @@ export default function App() {
   const [insights, setInsights] = useState<Insights | null>(null);
   const [prdData, setPrdData] = useState<PRDData | null>(null);
 
-  // Restore shared insights from URL hash
+  // Restore shared data from URL hash
   useEffect(() => {
     const hash = window.location.hash;
     if (hash.startsWith('#insights=')) {
       try {
-        const data = JSON.parse(atob(hash.slice(10)));
+        const data = decodeShare<{ insights: Insights; productName: string }>(hash.slice(10));
         if (data.insights && data.productName) {
           setInsights(data.insights);
           setFormData(prev => ({ ...prev, productName: data.productName }));
           setPage('insights');
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      } catch {}
+    } else if (hash.startsWith('#prd=')) {
+      try {
+        const data = decodeShare<{ prdData: PRDData; productName: string }>(hash.slice(5));
+        if (data.prdData && data.productName) {
+          setPrdData(data.prdData);
+          setFormData(prev => ({ ...prev, productName: data.productName }));
+          setPage('prd');
           window.history.replaceState(null, '', window.location.pathname);
         }
       } catch {}
@@ -130,61 +158,48 @@ export default function App() {
     <div className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="border-b border-zinc-100 sticky top-0 bg-white z-10">
-
-        {/* Top row: logo + step labels */}
-        <div className="page-container flex items-center justify-between h-12">
-          <button
-            onClick={() => navigate('landing')}
-            className="font-mono text-xs tracking-[0.15em] uppercase text-zinc-900 hover:text-zinc-500 transition-colors shrink-0"
-          >
-            UPS
-          </button>
-
-          {page !== 'landing' && (
-            <div className="flex items-center">
+        {page === 'landing' ? (
+          /* Landing: just the logo */
+          <div className="page-container flex items-center h-12">
+            <button
+              onClick={() => navigate('landing')}
+              className="font-mono text-xs tracking-[0.15em] uppercase text-zinc-900 hover:text-zinc-500 transition-colors"
+            >
+              User Perspective Simulator
+            </button>
+          </div>
+        ) : (
+          /* Steps nav */
+          <div className="page-container pt-4 pb-3">
+            {/* Step labels + dots, each aligned above its bar segment */}
+            <div className="flex mb-2">
               {STEPS.map((step, i) => {
-                const isDone   = stepIndex > i;
-                const isActive = stepIndex === i;
+                const isDone    = stepIndex > i;
+                const isActive  = stepIndex === i;
                 const reachable = isReachable(step.page);
                 return (
                   <button
                     key={step.page}
                     onClick={() => reachable && navigate(step.page)}
-                    className={`flex items-center gap-0 ${reachable ? 'cursor-pointer' : 'cursor-default'}`}
+                    className={`flex-1 flex items-center gap-1.5 ${reachable ? 'cursor-pointer' : 'cursor-default'}`}
                   >
-                    {/* Connector line between steps */}
-                    {i > 0 && (
-                      <div className={`w-8 h-px mx-1 transition-colors duration-300 ${isDone ? 'bg-zinc-400' : 'bg-zinc-100'}`} />
-                    )}
-                    {/* Step */}
-                    <div className="flex items-center gap-1.5">
-                      {/* Circle indicator */}
-                      <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                        isActive ? 'bg-zinc-900 scale-125' :
-                        isDone   ? 'bg-zinc-400' :
-                                   'bg-zinc-200'
-                      }`} />
-                      {/* Label */}
-                      <span className={`font-mono text-[10px] tracking-[0.12em] uppercase transition-colors duration-200 ${
-                        isActive ? 'text-zinc-900' :
-                        isDone   ? 'text-zinc-400 hover:text-zinc-700' :
-                                   'text-zinc-200'
-                      }`}>
-                        {step.label}
-                      </span>
-                    </div>
+                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300 ${
+                      isActive ? 'bg-zinc-900 scale-125' :
+                      isDone   ? 'bg-zinc-400' : 'bg-zinc-200'
+                    }`} />
+                    <span className={`font-mono text-[10px] tracking-[0.12em] uppercase transition-colors duration-200 ${
+                      isActive ? 'text-zinc-900' :
+                      isDone   ? 'text-zinc-400 hover:text-zinc-700' : 'text-zinc-200'
+                    }`}>
+                      {step.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
-          )}
-        </div>
 
-        {/* Bottom row: segmented bar + step description */}
-        {page !== 'landing' && (
-          <div className="page-container pb-2">
-            {/* Segmented progress bar */}
-            <div className="flex gap-1 mb-1.5">
+            {/* Bar segments — each flex-1, directly below its label */}
+            <div className="flex gap-1 mb-2">
               {STEPS.map((step, i) => {
                 const isDone   = stepIndex > i;
                 const isActive = stepIndex === i;
@@ -192,22 +207,20 @@ export default function App() {
                   <div key={step.page} className="flex-1 h-px bg-zinc-100 overflow-hidden">
                     <div
                       className="h-full bg-zinc-900 transition-all duration-500 ease-out"
-                      style={{ width: isDone ? '100%' : isActive ? '100%' : '0%',
-                               opacity: isDone ? 0.3 : isActive ? 1 : 0 }}
+                      style={{
+                        width:   isDone || isActive ? '100%' : '0%',
+                        opacity: isDone ? 0.3 : isActive ? 1 : 0,
+                      }}
                     />
                   </div>
                 );
               })}
             </div>
+
             {/* Description */}
-            <div className="flex items-center justify-between">
-              <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-zinc-400">
-                Step {stepIndex + 1} of {STEPS.length} — {currentStep?.description}
-              </p>
-              {stepIndex === STEPS.length - 1 && (
-                <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-zinc-300">Complete</p>
-              )}
-            </div>
+            <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-zinc-400">
+              Step {stepIndex + 1} of {STEPS.length} — {currentStep?.description}
+            </p>
           </div>
         )}
       </nav>

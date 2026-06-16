@@ -49,12 +49,12 @@
 
   .btn-primary {
     @apply inline-flex items-center gap-2 bg-zinc-900 text-white text-sm font-medium px-6 py-3
-           hover:bg-zinc-700 transition-colors duration-150 cursor-pointer;
+           hover:bg-zinc-700 active:scale-[0.97] transition-all duration-150 cursor-pointer;
   }
 
   .btn-secondary {
     @apply inline-flex items-center gap-2 border border-zinc-200 text-zinc-900 text-sm font-medium px-6 py-3
-           hover:border-zinc-400 transition-colors duration-150 cursor-pointer;
+           hover:border-zinc-400 active:scale-[0.97] transition-all duration-150 cursor-pointer;
   }
 
   .input-field {
@@ -80,14 +80,50 @@
   }
 }
 
+/* Animated input underline — grows from center on focus */
+  .input-underline {
+    position: relative;
+  }
+  .input-underline::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 0; height: 1px;
+    background: #18181b;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .input-underline:focus-within::after {
+    width: 100%; left: 0;
+  }
+
+  /* Stage cards staggered entry */
+  .stage-card-enter {
+    opacity: 0;
+    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .stage-card-enter:nth-child(1) { animation-delay: 0ms; }
+  .stage-card-enter:nth-child(2) { animation-delay: 80ms; }
+  .stage-card-enter:nth-child(3) { animation-delay: 160ms; }
+
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
