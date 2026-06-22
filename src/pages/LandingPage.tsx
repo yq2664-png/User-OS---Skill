@@ -54,7 +54,7 @@ export default function LandingPage({ onStart }: Props) {
           className="font-semibold text-[#1D1D1F] max-w-3xl mb-6"
           style={{ fontSize: 'clamp(40px, 5vw, 64px)', lineHeight: '1.06', letterSpacing: '-0.5px' }}
         >
-          Know what your users<br />actually think.
+          Discover what users need<br />before they tell you.
         </h1>
         <p className="text-[#6E6E73] text-lg max-w-xl leading-relaxed mb-10" style={{ fontWeight: 400 }}>
           Paste in a product description. Get AI-generated user perspectives,
