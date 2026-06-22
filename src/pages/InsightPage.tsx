@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Card, Insights, InsightItem, ImpactLevel } from '../App';
 import { encodeShare } from '../utils/shareLink';
-import LoadingModal from '../components/LoadingModal';
 
 interface Props {
   productName: string;
@@ -69,8 +68,8 @@ function InsightRow({
 
   return (
     <div
-      className={`card-enter border-b border-zinc-100 last:border-0 py-5 flex gap-0 transition-opacity duration-150 ${selected ? 'opacity-100' : 'opacity-40'}`}
-      style={{ animationDelay: `${animDelay}ms` }}
+      className={`card-enter py-5 flex gap-0 transition-opacity duration-150 ${selected ? 'opacity-100' : 'opacity-40'}`}
+      style={{ animationDelay: `${animDelay}ms`, borderBottom: '1px solid #F5F5F7' }}
     >
       {/* Priority color bar */}
       <div className="w-[3px] shrink-0 mr-5 rounded-full self-stretch" style={{ background: color }} />
@@ -78,8 +77,8 @@ function InsightRow({
       {/* Checkbox */}
       <button
         onClick={onToggle}
-        className="shrink-0 mt-0.5 w-4 h-4 border transition-colors duration-150 flex items-center justify-center mr-4"
-        style={{ borderColor: selected ? '#18181b' : '#d4d4d8', background: selected ? '#18181b' : 'white' }}
+        className="shrink-0 mt-0.5 w-4 h-4 transition-colors duration-150 flex items-center justify-center mr-4 rounded"
+        style={{ border: `1px solid ${selected ? '#1D1D1F' : '#D2D2D7'}`, background: selected ? '#1D1D1F' : 'white' }}
         title={selected ? 'Deselect' : 'Select'}
       >
         {selected && (
@@ -92,12 +91,12 @@ function InsightRow({
       {/* Content */}
       <div className="flex-1 min-w-0 pt-0.5">
         <div className="flex items-start justify-between gap-3 mb-1.5">
-          <p className="text-sm font-medium text-zinc-900 leading-snug">{item.title}</p>
-          <span className="font-mono text-[9px] tracking-widest uppercase shrink-0" style={{ color }}>{impact}</span>
+          <p className="text-sm font-semibold leading-snug" style={{ color: '#1D1D1F' }}>{item.title}</p>
+          <span className="text-[9px] tracking-widest uppercase shrink-0" style={{ color }}>{impact}</span>
         </div>
-        <p className="text-sm text-zinc-500 font-light leading-relaxed mb-2">{item.description}</p>
+        <p className="text-sm leading-relaxed mb-2" style={{ color: '#6E6E73' }}>{item.description}</p>
         {item.valueNote && (
-          <p className="text-xs text-zinc-400 font-mono border-l-2 border-zinc-100 pl-2 leading-relaxed">
+          <p className="text-xs leading-relaxed pl-2" style={{ color: '#6E6E73', borderLeft: '2px solid #D2D2D7' }}>
             {item.valueNote}
           </p>
         )}
@@ -127,9 +126,9 @@ function ImpactGroup({
       {/* Group label */}
       <div className="flex items-center gap-2 py-2 mb-1">
         <Stars level={level} />
-        <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-zinc-400">{level}</span>
-        <div className="flex-1 h-px bg-zinc-100" />
-        <span className="font-mono text-[9px] text-zinc-300">{items.length}</span>
+        <span className="text-[9px] tracking-[0.2em] uppercase" style={{ color: '#6E6E73' }}>{level}</span>
+        <div className="flex-1 h-px" style={{ background: '#F5F5F7' }} />
+        <span className="text-[9px]" style={{ color: '#D2D2D7' }}>{items.length}</span>
       </div>
       {items.map((item, i) => (
         <InsightRow
@@ -170,7 +169,13 @@ export default function InsightPage({ productName, cards, insights, setInsights,
 
   async function fetchInsights() {
     setLoading(true);
+    setInsightStep(0);
     setError('');
+    let step = 0;
+    insightStepTimer.current = setInterval(() => {
+      step = Math.min(step + 1, INSIGHT_STEPS.length - 1);
+      setInsightStep(step);
+    }, 2800);
     try {
       const res = await fetch('/api/insights', {
         method: 'POST',
@@ -184,6 +189,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
     } catch (e: any) {
       setError(e.message || 'Something went wrong.');
     } finally {
+      if (insightStepTimer.current) { clearInterval(insightStepTimer.current); insightStepTimer.current = null; }
       setLoading(false);
     }
   }
@@ -291,23 +297,23 @@ export default function InsightPage({ productName, cards, insights, setInsights,
     ? SECTIONS.reduce((sum, s) => sum + (insights[s.key] ?? []).filter(i => (i.impact ?? 'Medium') === 'Critical').length, 0)
     : 0;
 
-  const insightSteps = [
-    { label: 'Reading user perspectives', sublabel: 'Processing all collected feedback' },
-    { label: 'Identifying patterns', sublabel: 'Finding recurring themes and friction' },
-    { label: 'Scoring issues', sublabel: 'Ranking by frequency and business impact' },
-    { label: 'Surfacing opportunities', sublabel: 'Mapping gaps to product potential' },
+  const INSIGHT_STEPS = [
+    'Reading user perspectives',
+    'Identifying patterns',
+    'Scoring by business impact',
+    'Surfacing opportunities',
   ];
+  const [insightStep, setInsightStep] = useState(0);
+  const insightStepTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   return (
-    <>
-      <LoadingModal visible={loading} steps={insightSteps} />
     <main className="page-container py-20 sm:py-28">
 
       {/* Header */}
       <div className="mb-12">
         <p className="label-tag mb-6">{productName}</p>
         <div className="flex items-end gap-5">
-          <h1 className="text-4xl sm:text-5xl font-light text-zinc-900 leading-tight tracking-tight">
+          <h1 className="font-semibold text-[#1D1D1F] leading-tight" style={{ fontSize: 'clamp(32px, 4vw, 48px)', letterSpacing: '-0.3px' }}>
             Research Insights
           </h1>
           {loading && (
@@ -317,19 +323,37 @@ export default function InsightPage({ productName, cards, insights, setInsights,
           )}
         </div>
         {!loading && insights && (
-          <p className="mt-3 text-sm text-zinc-400 font-light">
+          <p className="mt-3 text-sm" style={{ color: '#6E6E73' }}>
             Synthesized from {cards.length} perspectives · click any insight to include or exclude
           </p>
         )}
+
+        {/* Inline loading steps */}
+        {loading && (
+          <div className="mt-8 space-y-2">
+            {INSIGHT_STEPS.map((step, i) => (
+              <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= insightStep ? 'opacity-100' : 'opacity-20'}`}>
+                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
+                  background: i < insightStep ? '#6E6E73' : i === insightStep ? '#0071E3' : '#D2D2D7',
+                }} />
+                <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: i === insightStep ? '#0071E3' : '#6E6E73' }}>
+                  {step}
+                  {i === insightStep && <span className="ml-1">…</span>}
+                  {i < insightStep && <span className="ml-1" style={{ color: '#D2D2D7' }}>✓</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Summary stats + legend */}
+      {/* Summary stats */}
       {insights && !loading && (
-        <div className="flex items-center gap-6 mb-10 pb-6 border-b border-zinc-100">
+        <div className="flex items-center gap-6 mb-10 pb-6" style={{ borderBottom: '1px solid #D2D2D7' }}>
           <div className="flex items-center gap-5">
-            <span className="font-mono text-[9px] tracking-widest uppercase text-zinc-300">{totalInsights} insights</span>
+            <span className="text-[9px] tracking-widest uppercase" style={{ color: '#D2D2D7' }}>{totalInsights} insights</span>
             {criticalCount > 0 && (
-              <span className="flex items-center gap-1 font-mono text-[9px] tracking-widest uppercase text-zinc-500">
+              <span className="flex items-center gap-1 text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>
                 <Stars level="Critical" /> {criticalCount} critical
               </span>
             )}
@@ -337,7 +361,8 @@ export default function InsightPage({ productName, cards, insights, setInsights,
           <div className="flex-1" />
           <button
             onClick={allSelected ? () => setSelected(new Set()) : selectAll}
-            className="font-mono text-[9px] tracking-[0.12em] uppercase text-zinc-400 hover:text-zinc-700 transition-colors"
+            className="text-[9px] tracking-[0.12em] uppercase transition-colors"
+            style={{ color: '#6E6E73' }}
           >
             {allSelected ? 'Deselect all' : 'Select all'}
           </button>
@@ -346,8 +371,8 @@ export default function InsightPage({ productName, cards, insights, setInsights,
 
       {/* Error */}
       {error && (
-        <div className="border border-zinc-200 p-6 mb-12 max-w-lg">
-          <p className="text-sm text-zinc-700 mb-4">{error}</p>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F5F5F7' }}>
+          <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
           <button onClick={() => { startedRef.current = false; fetchInsights(); }} className="btn-primary text-xs">Retry</button>
         </div>
       )}
@@ -359,7 +384,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
             <div key={s.key}>
               <div className="loading-bar h-3 w-40 rounded mb-6" />
               {[1, 2, 3].map(i => (
-                <div key={i} className="py-5 border-b border-zinc-100 flex gap-5">
+                <div key={i} className="py-5 flex gap-5" style={{ borderBottom: '1px solid #F5F5F7' }}>
                   <div className="shrink-0 w-16 space-y-2">
                     <div className="loading-bar h-5 w-12 rounded" />
                     <div className="loading-bar h-px w-full" />
@@ -384,12 +409,10 @@ export default function InsightPage({ productName, cards, insights, setInsights,
             if (!allItems.length) return null;
             return (
               <div key={section.key}>
-                {/* Section header */}
-                <div className="mb-4 pb-4 border-b border-zinc-900 flex items-baseline justify-between">
-                  <h2 className="text-sm font-medium tracking-wide text-zinc-900">{section.label}</h2>
-                  <span className="text-xs text-zinc-400 font-light hidden sm:block">{section.description}</span>
+                <div className="mb-4 pb-4 flex items-baseline justify-between" style={{ borderBottom: '2px solid #1D1D1F' }}>
+                  <h2 className="text-sm font-semibold tracking-wide" style={{ color: '#1D1D1F' }}>{section.label}</h2>
+                  <span className="text-xs hidden sm:block" style={{ color: '#6E6E73' }}>{section.description}</span>
                 </div>
-                {/* Sorted by urgency */}
                 {[...allItems]
                   .sort((a, b) => IMPACT_ORDER.indexOf(a.impact ?? 'Medium') - IMPACT_ORDER.indexOf(b.impact ?? 'Medium'))
                   .map((item, i) => (
@@ -410,7 +433,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
 
       {/* Footer */}
       {insights && (
-        <div className="mt-16 pt-10 border-t border-zinc-100">
+        <div className="mt-16 pt-10" style={{ borderTop: '1px solid #D2D2D7' }}>
           <div className="flex flex-wrap items-center gap-3 justify-between">
             <div className="flex items-center gap-3 flex-wrap">
               <button onClick={copyShareLink} className="btn-secondary">
@@ -441,7 +464,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
               </svg>
             </button>
           </div>
-          <p className="text-xs text-zinc-300 mt-4">
+          <p className="text-xs mt-4" style={{ color: '#D2D2D7' }}>
             {selected.size === 0
               ? 'Select at least one insight to continue'
               : `${selected.size} of ${totalInsights} selected`}
@@ -449,6 +472,5 @@ export default function InsightPage({ productName, cards, insights, setInsights,
         </div>
       )}
     </main>
-    </>
   );
 }

@@ -49,6 +49,7 @@ export interface Card {
 
 export interface RealCard {
   source: string;
+  sourceUrl?: string;
   persona: string;
   quote: string;
   highlight?: string;
@@ -142,7 +143,7 @@ export default function App() {
     { page: 'input',      label: 'Input',        description: 'Describe your product'         },
     { page: 'simulation', label: 'Perspectives',  description: 'Simulate user reactions'       },
     { page: 'insights',   label: 'Insights',      description: 'Analyze patterns & friction'   },
-    { page: 'prd',        label: 'PRD',           description: 'Generate requirements doc'     },
+    { page: 'prd',        label: 'Decision',      description: 'Recommend product decisions'   },
   ];
 
   const stepIndex = STEPS.findIndex(s => s.page === page);
@@ -157,70 +158,74 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
-      <nav className="border-b border-zinc-100 sticky top-0 bg-white z-10">
+      <nav className="sticky top-0 z-10 bg-white" style={{ borderBottom: '1px solid #D2D2D7' }}>
         {page === 'landing' ? (
           /* Landing: just the logo */
-          <div className="page-container flex items-center h-12">
+          <div className="page-container flex items-center h-11">
             <button
               onClick={() => navigate('landing')}
-              className="font-mono text-xs tracking-[0.15em] uppercase text-zinc-900 hover:text-zinc-500 transition-colors"
+              className="text-xs font-semibold tracking-[0.12em] uppercase text-[#1D1D1F] transition-colors"
+              style={{ transition: 'color 0.24s cubic-bezier(0.4,0,0.6,1)' }}
             >
-              User Perspective Simulator
+              User OS
             </button>
           </div>
         ) : (
           /* Steps nav */
-          <div className="page-container pt-4 pb-3">
-            {/* Step labels + dots, each aligned above its bar segment */}
-            <div className="flex mb-2">
-              {STEPS.map((step, i) => {
-                const isDone    = stepIndex > i;
-                const isActive  = stepIndex === i;
-                const reachable = isReachable(step.page);
-                return (
-                  <button
-                    key={step.page}
-                    onClick={() => reachable && navigate(step.page)}
-                    className={`flex-1 flex items-center gap-1.5 ${reachable ? 'cursor-pointer' : 'cursor-default'}`}
-                  >
-                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300 ${
-                      isActive ? 'bg-zinc-900 scale-125' :
-                      isDone   ? 'bg-zinc-400' : 'bg-zinc-200'
-                    }`} />
-                    <span className={`font-mono text-[10px] tracking-[0.12em] uppercase transition-colors duration-200 ${
-                      isActive ? 'text-zinc-900' :
-                      isDone   ? 'text-zinc-400 hover:text-zinc-700' : 'text-zinc-200'
-                    }`}>
-                      {step.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="page-container py-2">
+            <div className="flex items-stretch">
+              {/* Logo */}
+              <button
+                onClick={() => navigate('landing')}
+                className="text-xs font-semibold tracking-[0.12em] uppercase text-[#1D1D1F] pr-6 flex items-center"
+                style={{ borderRight: '1px solid #D2D2D7' }}
+              >
+                User OS
+              </button>
 
-            {/* Bar segments — each flex-1, directly below its label */}
-            <div className="flex gap-1 mb-2">
-              {STEPS.map((step, i) => {
-                const isDone   = stepIndex > i;
-                const isActive = stepIndex === i;
-                return (
-                  <div key={step.page} className="flex-1 h-px bg-zinc-100 overflow-hidden">
-                    <div
-                      className="h-full bg-zinc-900 transition-all duration-500 ease-out"
-                      style={{
-                        width:   isDone || isActive ? '100%' : '0%',
-                        opacity: isDone ? 0.3 : isActive ? 1 : 0,
-                      }}
-                    />
-                  </div>
-                );
-              })}
+              {/* Steps — each takes equal flex width, with bar below label */}
+              <div className="flex flex-1 pl-4">
+                {STEPS.map((step, i) => {
+                  const isDone    = stepIndex > i;
+                  const isActive  = stepIndex === i;
+                  const reachable = isReachable(step.page);
+                  return (
+                    <button
+                      key={step.page}
+                      onClick={() => reachable && navigate(step.page)}
+                      className={`flex-1 flex flex-col gap-1.5 py-1 ${reachable ? 'cursor-pointer' : 'cursor-default'}`}
+                    >
+                      {/* Label row */}
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
+                          background: isActive ? '#0071E3' : isDone ? '#6E6E73' : '#D2D2D7',
+                        }} />
+                        <span
+                          className="text-[11px] font-medium"
+                          style={{
+                            color: isActive ? '#0071E3' : isDone ? '#1D1D1F' : '#D2D2D7',
+                            transition: 'color 0.24s cubic-bezier(0.4,0,0.6,1)',
+                          }}
+                        >
+                          {step.label}
+                        </span>
+                      </div>
+                      {/* Bar — full width of this flex cell */}
+                      <div className="h-px w-full overflow-hidden" style={{ background: '#F5F5F7' }}>
+                        <div
+                          className="h-full transition-all duration-500"
+                          style={{
+                            width:      isDone || isActive ? '100%' : '0%',
+                            background: isActive ? '#0071E3' : '#6E6E73',
+                            opacity:    isDone ? 0.4 : isActive ? 1 : 0,
+                          }}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-
-            {/* Description */}
-            <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-zinc-400">
-              Step {stepIndex + 1} of {STEPS.length} — {currentStep?.description}
-            </p>
           </div>
         )}
       </nav>
@@ -260,6 +265,8 @@ export default function App() {
             insights={insights!}
             prdData={prdData}
             setPrdData={setPrdData}
+            onGoLanding={() => navigate('landing')}
+            onNewProduct={() => { setCards([]); setInsights(null); setPrdData(null); navigate('input'); }}
           />
         )}
       </div>

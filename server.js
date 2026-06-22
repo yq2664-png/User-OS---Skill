@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -16,7 +15,59 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const ANTHROPIC_HEADERS = {
+  'x-api-key': ANTHROPIC_KEY,
+  'anthropic-version': '2023-06-01',
+  'content-type': 'application/json',
+};
+
+async function claudeCreate(model, max_tokens, messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: ANTHROPIC_HEADERS,
+    body: JSON.stringify({ model, max_tokens, messages }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Anthropic API error ${res.status}: ${err}`);
+  }
+  return res.json();
+}
+
+async function claudeStream(model, max_tokens, messages, onText, onDone) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: ANTHROPIC_HEADERS,
+    body: JSON.stringify({ model, max_tokens, messages, stream: true }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Anthropic stream error ${res.status}: ${err}`);
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6).trim();
+      if (payload === '[DONE]') continue;
+      try {
+        const evt = JSON.parse(payload);
+        if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+          onText(evt.delta.text);
+        }
+      } catch {}
+    }
+  }
+  onDone();
+}
 
 // ── Simulate ──────────────────────────────────────────────────────────────────
 app.post('/api/simulate', upload.fields([{ name: 'screenshots', maxCount: 5 }, { name: 'documents', maxCount: 5 }]), async (req, res) => {
@@ -69,19 +120,13 @@ app.post('/api/simulate', upload.fields([{ name: 'screenshots', maxCount: 5 }, {
   content.push({ type: 'text', text: buildSimulatePrompt(productName, productType, productDesc, existingPersonas, count, fc, tc, productStage, webLink, webContent) });
 
   try {
-    const stream = anthropic.messages.stream({
-      model: 'claude-opus-4-8',
-      max_tokens: 4000,
-      messages: [{ role: 'user', content }]
-    });
-
-    stream.on('text', (text) => {
-      res.write(`data: ${JSON.stringify({ text })}\n\n`);
-    });
-
-    await stream.finalMessage();
-    res.write('data: [DONE]\n\n');
-    res.end();
+    await claudeStream(
+      'claude-opus-4-8',
+      4000,
+      [{ role: 'user', content }],
+      (text) => res.write(`data: ${JSON.stringify({ text })}\n\n`),
+      () => { res.write('data: [DONE]\n\n'); res.end(); }
+    );
   } catch (err) {
     res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
     res.end();
@@ -124,6 +169,7 @@ app.post('/api/real-perspectives', async (req, res) => {
       );
       const reviewData = await reviewRes.json();
       const entries = reviewData?.feed?.entry ?? [];
+      const appUrl = `https://apps.apple.com/us/app/id${appId}`;
       const reviews = entries
         .filter(e => e?.content?.label?.length > 30)
         .slice(0, 8)
@@ -131,7 +177,7 @@ app.post('/api/real-perspectives', async (req, res) => {
           const title = e?.title?.label ?? '';
           const body = e?.content?.label ?? '';
           const rating = e?.['im:rating']?.label ?? '';
-          return `[App Store – ${rating}★ "${title}"]\n${body.slice(0, 400)}`;
+          return `[App Store – URL:${appUrl} – ${rating}★ "${title}"]\n${body.slice(0, 400)}`;
         });
       if (reviews.length) sections.push('=== App Store Reviews ===\n' + reviews.join('\n---\n'));
     })(),
@@ -152,13 +198,14 @@ app.post('/api/real-perspectives', async (req, res) => {
       );
       const reviewData = await reviewRes.json();
       const entries = reviewData?.feed?.entry ?? [];
+      const cnAppUrl = `https://apps.apple.com/cn/app/id${appId}`;
       const reviews = entries
         .filter(e => e?.content?.label?.length > 20)
         .slice(0, 6)
         .map(e => {
           const title = e?.title?.label ?? '';
           const body = e?.content?.label ?? '';
-          return `[中国 App Store – "${title}"]\n${body.slice(0, 300)}`;
+          return `[中国 App Store – URL:${cnAppUrl} – "${title}"]\n${body.slice(0, 300)}`;
         });
       if (reviews.length) sections.push('=== 中国 App Store 评价 ===\n' + reviews.join('\n---\n'));
     })(),
@@ -177,7 +224,10 @@ app.post('/api/real-perspectives', async (req, res) => {
           return text.includes(productLower) && text.length > 80;
         })
         .slice(0, 5)
-        .map(h => `[HackerNews]\n${h.comment_text.replace(/<[^>]+>/g, '').slice(0, 400)}`);
+        .map(h => {
+          const hnUrl = h.objectID ? `https://news.ycombinator.com/item?id=${h.objectID}` : 'https://news.ycombinator.com';
+          return `[HackerNews – URL:${hnUrl}]\n${h.comment_text.replace(/<[^>]+>/g, '').slice(0, 400)}`;
+        });
       if (comments.length) sections.push('=== HackerNews ===\n' + comments.join('\n---\n'));
     })(),
 
@@ -186,7 +236,7 @@ app.post('/api/real-perspectives', async (req, res) => {
       const r = await fetch(webLink, { headers, signal: AbortSignal.timeout(10000) });
       const html = await r.text();
       const text = stripHtml(html).slice(0, 4000);
-      sections.push(`=== Product website ===\n${text}`);
+      sections.push(`=== Product website – URL:${webLink} ===\n${text}`);
     })()] : []),
 
   ]);
@@ -198,10 +248,7 @@ app.post('/api/real-perspectives', async (req, res) => {
   const rawContent = sections.join('\n\n').slice(0, 10000);
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-opus-4-8',
-      max_tokens: 2000,
-      messages: [{
+    const message = await claudeCreate('claude-haiku-4-5-20251001', 2000, [{
         role: 'user',
         content: `You are extracting real user perspectives about "${productName}" from multiple web sources.
 
@@ -214,6 +261,7 @@ Return ONLY valid JSON array:
 [
   {
     "source": "App Store" | "HackerNews" | "Web",
+    "sourceUrl": "the URL from the URL: label in the source section header",
     "persona": "Brief user type inferred from context (e.g. 'Developer', 'Small business owner', 'Student')",
     "quote": "Real or closely paraphrased first-person quote. 1–2 sentences.",
     "highlight": "the most revealing 3-6 word phrase verbatim from the quote",
@@ -222,8 +270,7 @@ Return ONLY valid JSON array:
 ]
 
 If the content contains no real user voices (only marketing text), return [].`,
-      }],
-    });
+      }]);
 
     const text = message.content[0].text;
     const match = text.match(/\[[\s\S]*\]/);
@@ -236,8 +283,48 @@ If the content contains no real user voices (only marketing text), return [].`,
 
 // ── Verify Product ────────────────────────────────────────────────────────────
 app.post('/api/verify-product', async (req, res) => {
-  const { webLink } = req.body;
+  const { webLink, productName, productStage } = req.body;
+
+  // Client app: search App Store for multiple results
+  if (productStage === 'client' && productName) {
+    try {
+      const r = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(productName)}&entity=software&limit=5`,
+        { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(8000) }
+      );
+      const data = await r.json();
+      const results = (data?.results ?? []).map(app => ({
+        name: app.trackName,
+        tagline: app.description?.slice(0, 120) ?? '',
+        audience: app.primaryGenreName ?? '',
+        features: [],
+        logo: app.artworkUrl100 ?? app.artworkUrl60 ?? '',
+        appId: app.trackId,
+      }));
+      if (results.length) return res.json({ multiple: results });
+      return res.status(404).json({ error: 'No apps found. Please check the product name.' });
+    } catch (e) {
+      return res.status(422).json({ error: 'Could not search the App Store.' });
+    }
+  }
+
   if (!webLink) return res.status(400).json({ error: 'No URL provided' });
+
+  // Derive domain for logo
+  let domain = '';
+  try { domain = new URL(webLink).hostname; } catch {}
+  const logo = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
+
+  // Fetch screenshot via Microlink (free tier)
+  let screenshot = '';
+  try {
+    const mlRes = await fetch(
+      `https://api.microlink.io/?url=${encodeURIComponent(webLink)}&screenshot=true&meta=false`,
+      { signal: AbortSignal.timeout(10000) }
+    );
+    const mlData = await mlRes.json();
+    screenshot = mlData?.data?.screenshot?.url ?? '';
+  } catch {}
 
   let pageText = '';
   try {
@@ -258,10 +345,7 @@ app.post('/api/verify-product', async (req, res) => {
   }
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-opus-4-8',
-      max_tokens: 500,
-      messages: [{
+    const message = await claudeCreate('claude-haiku-4-5-20251001', 500, [{
         role: 'user',
         content: `Based on the following web page content, extract key information about this product.
 
@@ -277,10 +361,9 @@ Return ONLY valid JSON with this exact structure:
 }
 
 Be concise and accurate. Base everything strictly on what is on the page.`,
-      }],
-    });
+      }]);
     const match = message.content[0].text.match(/\{[\s\S]*\}/);
-    if (match) res.json(JSON.parse(match[0]));
+    if (match) res.json({ ...JSON.parse(match[0]), logo, screenshot });
     else res.status(500).json({ error: 'Could not parse product info' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -291,11 +374,7 @@ Be concise and accurate. Base everything strictly on what is on the page.`,
 app.post('/api/insights', async (req, res) => {
   const { cards, productName } = req.body;
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-opus-4-8',
-      max_tokens: 3000,
-      messages: [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]
-    });
+    const message = await claudeCreate('claude-opus-4-8', 3000, [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]);
     const text = message.content[0].text;
     const match = text.match(/\{[\s\S]*\}/);
     if (match) res.json(JSON.parse(match[0]));
@@ -309,11 +388,7 @@ app.post('/api/insights', async (req, res) => {
 app.post('/api/prd', async (req, res) => {
   const { productName, insights } = req.body;
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-opus-4-8',
-      max_tokens: 4000,
-      messages: [{ role: 'user', content: buildPRDPrompt(productName, insights) }]
-    });
+    const message = await claudeCreate('claude-opus-4-8', 4000, [{ role: 'user', content: buildPRDPrompt(productName, insights) }]);
     const text = message.content[0].text;
     const match = text.match(/\{[\s\S]*\}/);
     if (match) res.json(JSON.parse(match[0]));

@@ -1,104 +1,111 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Card, FormData, RealCard } from '../App';
-import LoadingModal from '../components/LoadingModal';
-
-const EMOTION_COLOR: Record<string, string> = {
-  Excited: 'text-zinc-600',
-  Confused: 'text-zinc-500',
-  Frustrated: 'text-zinc-900',
-  Curious: 'text-zinc-600',
-  Skeptical: 'text-zinc-700',
-  Overwhelmed: 'text-zinc-500',
-  Delighted: 'text-zinc-600',
-  Anxious: 'text-zinc-700',
-};
-
-const EMOTION_BORDER: Record<string, string> = {
-  Frustrated:  'border-l-[3px] border-l-zinc-900',
-  Anxious:     'border-l-[3px] border-l-zinc-700',
-  Skeptical:   'border-l-2 border-l-zinc-500',
-  Overwhelmed: 'border-l-2 border-l-zinc-400',
-  Confused:    'border-l-2 border-l-zinc-300',
-  Curious:     'border-l border-l-zinc-300',
-  Excited:     'border-l border-l-zinc-300',
-  Delighted:   'border-l border-l-zinc-200',
-};
 
 function HighlightedThought({ thought, highlight }: { thought: string; highlight?: string }) {
-  if (!highlight) return <span className="text-zinc-700">{thought}</span>;
+  if (!highlight) return <span style={{ color: '#1D1D1F' }}>{thought}</span>;
   const idx = thought.indexOf(highlight);
-  if (idx === -1) return <span className="text-zinc-700">{thought}</span>;
+  if (idx === -1) return <span style={{ color: '#1D1D1F' }}>{thought}</span>;
   return (
     <>
-      {idx > 0 && <span className="text-zinc-400">{thought.slice(0, idx)}</span>}
-      <span className="text-zinc-900 font-medium">{highlight}</span>
+      {idx > 0 && <span style={{ color: '#6E6E73' }}>{thought.slice(0, idx)}</span>}
+      <span style={{ color: '#1D1D1F', fontWeight: 600 }}>{highlight}</span>
       {idx + highlight.length < thought.length && (
-        <span className="text-zinc-400">{thought.slice(idx + highlight.length)}</span>
+        <span style={{ color: '#6E6E73' }}>{thought.slice(idx + highlight.length)}</span>
       )}
     </>
   );
 }
 
-function PersonaCard({
-  card,
-  index,
-  onRemove,
-}: {
-  card: Card;
-  index: number;
-  onRemove: () => void;
-}) {
+function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onRemove: () => void }) {
   const [hovered, setHovered] = useState(false);
-
   return (
     <div
-      className={`card-enter perspective-card bg-white p-8 lg:p-9 relative group transition-all duration-200 ${hovered ? 'scale-[1.03] z-10 outline outline-2 outline-zinc-900' : 'outline outline-2 outline-transparent'}`}
-      style={{ animationDelay: `${index * 80}ms` }}
+      className="card-enter perspective-card relative group"
+      style={{
+        animationDelay: `${index * 80}ms`,
+        background: 'white',
+        padding: '32px',
+        borderRadius: '20px',
+        outline: hovered ? '2px solid #1D1D1F' : '2px solid transparent',
+        transform: hovered ? 'translateY(-2px)' : 'none',
+        transition: 'transform 0.24s cubic-bezier(0.4,0,0.6,1), outline 0.1s',
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Remove button */}
       <button
         onClick={onRemove}
-        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-zinc-300 hover:text-zinc-700"
-        title="Remove"
+        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+        style={{ color: '#D2D2D7' }}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </button>
-
-      {/* Meta row */}
       <div className="flex items-center justify-between mb-5">
-        <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-zinc-400">
-          {card.persona}
-        </span>
-        <span className={`font-mono text-[10px] tracking-[0.12em] uppercase ${EMOTION_COLOR[card.emotion] ?? 'text-zinc-500'}`}>
-          {card.emotion}
-        </span>
+        <span className="text-[10px] tracking-[0.18em] uppercase" style={{ color: '#6E6E73' }}>{card.persona}</span>
+        <span className="text-[10px] tracking-[0.12em] uppercase" style={{ color: '#1D1D1F' }}>{card.emotion}</span>
       </div>
-
-      {/* Thought with highlight */}
-      <p className="text-lg sm:text-xl leading-relaxed font-light">
+      <p className="text-lg sm:text-xl leading-relaxed">
         "<HighlightedThought thought={card.thought} highlight={card.highlight} />"
       </p>
-
-      {/* Background hover tooltip */}
       {card.background && hovered && (
-        <div className="absolute bottom-full left-0 mb-2 z-20 w-full bg-zinc-900 text-white p-5 shadow-lg pointer-events-none card-enter"
-          style={{ animationDelay: '0ms' }}>
+        <div className="absolute bottom-full left-0 mb-2 z-20 w-full text-white p-5 pointer-events-none card-enter rounded-2xl"
+          style={{ background: '#1D1D1F', animationDelay: '0ms' }}>
           <div className="flex items-baseline justify-between mb-3">
-            <span className="text-sm font-medium">{card.background.name}</span>
-            <span className="font-mono text-[10px] text-zinc-400 ml-2">{card.background.age}</span>
+            <span className="text-sm font-semibold">{card.background.name}</span>
+            <span className="text-[10px] ml-2" style={{ color: '#6E6E73' }}>{card.background.age}</span>
           </div>
-          <p className="font-mono text-[10px] tracking-wide text-zinc-400 uppercase mb-2">
-            {card.background.job}
-          </p>
-          <p className="text-xs text-zinc-400 font-light leading-relaxed">
-            {card.background.context}
-          </p>
+          <p className="text-[10px] tracking-wide uppercase mb-2" style={{ color: '#6E6E73' }}>{card.background.job}</p>
+          <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{card.background.context}</p>
         </div>
       )}
+    </div>
+  );
+}
+
+function RealCardItem({ card, index, onRemove }: { card: RealCard; index: number; onRemove: () => void }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="card-enter relative group"
+      style={{
+        animationDelay: `${index * 60}ms`,
+        background: 'white',
+        padding: '32px',
+        borderRadius: '20px',
+        outline: hovered ? '2px solid #1D1D1F' : '2px solid transparent',
+        transform: hovered ? 'translateY(-2px)' : 'none',
+        transition: 'transform 0.24s cubic-bezier(0.4,0,0.6,1), outline 0.1s',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <button
+        onClick={onRemove}
+        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+        style={{ color: '#D2D2D7' }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </button>
+      <div className="flex items-center justify-between mb-5">
+        <span className="text-[10px] tracking-[0.18em] uppercase" style={{ color: '#6E6E73' }}>{card.persona}</span>
+        {card.sourceUrl ? (
+          <a href={card.sourceUrl} target="_blank" rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="text-[10px] tracking-[0.12em] uppercase underline underline-offset-2"
+            style={{ color: '#0071E3' }}>
+            {card.source}
+          </a>
+        ) : (
+          <span className="text-[10px] tracking-[0.12em] uppercase" style={{ color: '#6E6E73' }}>{card.source}</span>
+        )}
+      </div>
+      <p className="text-lg sm:text-xl leading-relaxed">
+        "<HighlightedThought thought={card.quote} highlight={card.highlight} />"
+      </p>
     </div>
   );
 }
@@ -110,44 +117,29 @@ interface Props {
   onNext: () => void;
 }
 
-const SENTIMENT_BORDER: Record<string, string> = {
-  positive: 'border-l-[3px] border-l-zinc-300',
-  neutral:  'border-l-2 border-l-zinc-200',
-  negative: 'border-l-[3px] border-l-zinc-700',
-};
-
-function RealCardItem({ card, index }: { card: RealCard; index: number }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <div
-      className={`card-enter bg-white p-8 lg:p-9 relative transition-all duration-200 ${hovered ? 'scale-[1.03] z-10 outline outline-2 outline-zinc-900' : 'outline outline-2 outline-transparent'}`}
-      style={{ animationDelay: `${index * 60}ms` }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div className="flex items-center justify-between mb-5">
-        <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-zinc-400">{card.persona}</span>
-        <span className="font-mono text-[10px] tracking-[0.12em] uppercase text-zinc-400">{card.source}</span>
-      </div>
-      <p className="text-lg sm:text-xl leading-relaxed font-light">
-        "<HighlightedThought thought={card.quote} highlight={card.highlight} />"
-      </p>
-    </div>
-  );
-}
+const SIM_STEPS = [
+  'Analyzing your product',
+  'Searching the web for context',
+  'Building user personas',
+  'Simulating reactions',
+];
 
 export default function SimulationPage({ formData, cards, setCards, onNext }: Props) {
   const [streaming, setStreaming] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [done, setDone] = useState(cards.length > 0);
   const [error, setError] = useState('');
+  const [simStep, setSimStep] = useState(0);
+
   const [realCards, setRealCards] = useState<RealCard[]>([]);
   const [realLoading, setRealLoading] = useState(false);
   const [realError, setRealError] = useState('');
+
   const bufferRef = useRef('');
   const cardsRef = useRef<Card[]>(cards);
   const startedRef = useRef(false);
   const realStartedRef = useRef(false);
+  const simStepTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const showReal = formData.productStage === 'web' || formData.productStage === 'client';
 
@@ -157,14 +149,13 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
     runSimulation();
   }, []);
 
-  // Fetch real perspectives for web/client products once simulation starts
   useEffect(() => {
     if (!showReal || realStartedRef.current || realCards.length > 0) return;
     realStartedRef.current = true;
     fetchRealPerspectives();
   }, [showReal]);
 
-  async function fetchRealPerspectives() {
+  async function fetchRealPerspectives(searchMore = false) {
     setRealLoading(true);
     setRealError('');
     try {
@@ -177,10 +168,11 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
           productStage: formData.productStage,
         }),
       });
-      if (!res.ok) throw new Error(`Server returned ${res.status} — make sure the backend is running (npm run dev)`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      setRealCards(data.cards ?? []);
+      const newCards = data.cards ?? [];
+      setRealCards(searchMore ? prev => [...prev, ...newCards] : newCards);
     } catch (e: any) {
       setRealError(e.message || 'Could not load real perspectives.');
     } finally {
@@ -193,8 +185,15 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
       setLoadingMore(true);
     } else {
       setStreaming(true);
+      setSimStep(0);
       cardsRef.current = [];
       setCards([]);
+      // Cycle through loading steps
+      let step = 0;
+      simStepTimer.current = setInterval(() => {
+        step = Math.min(step + 1, SIM_STEPS.length - 1);
+        setSimStep(step);
+      }, 2500);
     }
     setError('');
     bufferRef.current = '';
@@ -220,7 +219,6 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
       if (!res.ok) throw new Error('Server error');
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
-
       while (true) {
         const { done: streamDone, value } = await reader.read();
         if (streamDone) break;
@@ -232,16 +230,14 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
           try {
             const { text, error: err } = JSON.parse(payload);
             if (err) throw new Error(err);
-            if (text) {
-              bufferRef.current += text;
-              parseCards(more);
-            }
+            if (text) { bufferRef.current += text; parseCards(more); }
           } catch { /* buffering */ }
         }
       }
     } catch (e: any) {
       setError(e.message || 'Something went wrong.');
     } finally {
+      if (simStepTimer.current) { clearInterval(simStepTimer.current); simStepTimer.current = null; }
       setStreaming(false);
       setLoadingMore(false);
       setDone(true);
@@ -261,10 +257,6 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
       }
     }
     if (newCards.length > 0) {
-      const combined = append
-        ? [...cardsRef.current.filter(c => !newCards.find(n => n.persona === c.persona)), ...cardsRef.current.filter(c => newCards.find(n => n.persona === c.persona)), ...newCards.filter(n => !cardsRef.current.find(c => c.persona === n.persona))]
-        : newCards;
-      // simpler: append just adds new ones
       const result = append
         ? [...cardsRef.current, ...newCards.filter(n => !cardsRef.current.find(c => c.persona === n.persona))]
         : newCards;
@@ -281,27 +273,19 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
     setCards(updated);
   };
 
+  const removeRealCard = (i: number) => setRealCards(prev => prev.filter((_, idx) => idx !== i));
+
   const isLoading = streaming || loadingMore;
 
-  const simProgress = Math.round((cards.length / 8) * 100);
-  const simSteps = [
-    { label: 'Analyzing your product', sublabel: 'Reading description and stage' },
-    { label: 'Building user personas', sublabel: 'Defining diverse user profiles' },
-    { label: 'Simulating perspectives', sublabel: 'Generating authentic reactions' },
-    { label: 'Adding background detail', sublabel: 'Enriching each user profile' },
-  ];
-
   return (
-    <>
-      <LoadingModal visible={streaming} steps={simSteps} progress={simProgress} />
     <main className="page-container py-20 sm:py-28">
 
       {/* Header */}
       <div className="mb-16">
         <p className="label-tag mb-6">{formData.productName}</p>
         <div className="flex items-end gap-6">
-          <h1 className="text-4xl sm:text-5xl font-light text-zinc-900 leading-tight tracking-tight">
-            {streaming ? 'Simulating perspectives' : 'User Perspectives'}
+          <h1 className="font-semibold text-[#1D1D1F] leading-tight" style={{ fontSize: 'clamp(32px, 4vw, 48px)', letterSpacing: '-0.3px' }}>
+            User Perspectives
           </h1>
           {isLoading && (
             <div className="flex items-center gap-1.5 mb-2.5">
@@ -312,40 +296,55 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
           )}
         </div>
         {done && cards.length > 0 && (
-          <p className="mt-3 text-sm text-zinc-400 font-light">
+          <p className="mt-3 text-sm" style={{ color: '#6E6E73' }}>
             {cards.length} perspectives · hover a card to see persona details · click × to remove
           </p>
+        )}
+
+        {/* Inline loading step list */}
+        {streaming && (
+          <div className="mt-8 space-y-2">
+            {SIM_STEPS.map((step, i) => (
+              <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= simStep ? 'opacity-100' : 'opacity-20'}`}>
+                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
+                  background: i < simStep ? '#6E6E73' : i === simStep ? '#0071E3' : '#D2D2D7',
+                }} />
+                <span className="text-[10px] tracking-[0.15em] uppercase" style={{
+                  color: i === simStep ? '#0071E3' : '#6E6E73',
+                }}>
+                  {step}
+                  {i === simStep && <span className="ml-1">…</span>}
+                  {i < simStep && <span className="ml-1" style={{ color: '#D2D2D7' }}>✓</span>}
+                </span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
       {/* Error */}
       {error && (
-        <div className="border border-zinc-200 p-6 mb-12 max-w-lg">
-          <p className="text-sm text-zinc-700 mb-4">{error}</p>
-          <button
-            onClick={() => { startedRef.current = false; runSimulation(); }}
-            className="btn-primary text-xs"
-          >
-            Retry
-          </button>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F5F5F7' }}>
+          <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
+          <button onClick={() => { startedRef.current = false; runSimulation(); }} className="btn-primary text-xs">Retry</button>
         </div>
       )}
 
-      {/* Real Perspectives Section — shown first */}
-      {showReal && (
+      {/* Real User Voices */}
+      {showReal && (realLoading || realCards.length > 0 || realError) && (
         <div className="mb-20">
           <div className="flex items-baseline gap-4 mb-3">
-            <h2 className="text-2xl font-light text-zinc-900">Real User Voices</h2>
-            <span className="font-mono text-[9px] tracking-widest uppercase text-zinc-400">From the web</span>
+            <h2 className="text-2xl font-semibold" style={{ color: '#1D1D1F' }}>Real User Voices</h2>
+            <span className="text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>From the web</span>
           </div>
-          <p className="text-sm text-zinc-400 font-light mb-8">
+          <p className="text-sm mb-8" style={{ color: '#6E6E73' }}>
             Real feedback found online for {formData.productName}
           </p>
 
-          {realLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-zinc-100">
+          {realLoading && realCards.length === 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="bg-zinc-50 p-8">
+                <div key={i} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
                   <div className="flex justify-between mb-4">
                     <div className="loading-bar h-2 w-20 rounded" />
                     <div className="loading-bar h-2 w-14 rounded" />
@@ -360,56 +359,73 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
           )}
 
           {realError && (
-            <div className="flex items-start gap-4 p-6 bg-zinc-50">
-              <span className="text-zinc-300 mt-0.5 shrink-0">
+            <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ background: '#F5F5F7' }}>
+              <span className="mt-0.5 shrink-0" style={{ color: '#D2D2D7' }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
                   <path d="M7 4v3.5M7 10h.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                 </svg>
               </span>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Could not load real perspectives — the backend server may not be running. Start it with <code className="font-mono bg-zinc-100 px-1 py-0.5 rounded text-zinc-600">npm run dev</code>.
+              <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>
+                Could not load real perspectives — the backend server may not be running.
               </p>
             </div>
           )}
 
-          {!realLoading && realCards.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-zinc-100">
+          {realCards.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {realCards.map((card, i) => (
-                <RealCardItem key={i} card={card} index={i} />
+                <RealCardItem key={i} card={card} index={i} onRemove={() => removeRealCard(i)} />
+              ))}
+              {realLoading && [1, 2].map(i => (
+                <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
+                  <div className="flex justify-between mb-4">
+                    <div className="loading-bar h-2 w-20 rounded" />
+                    <div className="loading-bar h-2 w-14 rounded" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="loading-bar h-2.5 w-full rounded" />
+                    <div className="loading-bar h-2.5 w-5/6 rounded" />
+                  </div>
+                </div>
               ))}
             </div>
           )}
 
           {!realLoading && !realError && realCards.length === 0 && (
-            <p className="text-sm text-zinc-300 border border-zinc-100 p-6">
+            <p className="text-sm p-6 rounded-2xl" style={{ color: '#6E6E73', background: '#F5F5F7' }}>
               No real user reviews found online for this product.
             </p>
+          )}
+
+          {!realLoading && realCards.length > 0 && (
+            <button
+              onClick={() => fetchRealPerspectives(true)}
+              className="mt-3 w-full py-5 text-sm flex items-center justify-center gap-2 rounded-2xl transition-colors duration-150"
+              style={{ border: '1.5px dashed #D2D2D7', color: '#6E6E73' }}
+            >
+              <span className="text-lg leading-none">+</span>
+              Search more real voices
+            </button>
           )}
         </div>
       )}
 
-      {/* Simulated Perspectives */}
-      {showReal && (cards.length > 0 || streaming) && (
-        <div className="flex items-baseline gap-4 mb-3">
-          <h2 className="text-2xl font-light text-zinc-900">Simulated Perspectives</h2>
-          <span className="font-mono text-[9px] tracking-widest uppercase text-zinc-400">AI-generated</span>
+      {/* Simulated Perspectives section title */}
+      {showReal && done && (cards.length > 0 || loadingMore) && (
+        <div className="flex items-baseline gap-4 mb-3 card-enter" style={{ animationDelay: '0ms' }}>
+          <h2 className="text-2xl font-semibold" style={{ color: '#1D1D1F' }}>Simulated Perspectives</h2>
+          <span className="text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>AI-generated</span>
         </div>
       )}
-      {(cards.length > 0 || streaming) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-zinc-100">
-          {cards.map((card, i) => (
-            <PersonaCard
-              key={`${card.persona}-${i}`}
-              card={card}
-              index={i}
-              onRemove={() => removeCard(i)}
-            />
-          ))}
 
-          {/* Placeholders while streaming */}
+      {(cards.length > 0 || streaming) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {cards.map((card, i) => (
+            <PersonaCard key={`${card.persona}-${i}`} card={card} index={i} onRemove={() => removeCard(i)} />
+          ))}
           {streaming && Array.from({ length: Math.max(0, 8 - cards.length) }).map((_, i) => (
-            <div key={`ph-${i}`} className="bg-white p-8 lg:p-9">
+            <div key={`ph-${i}`} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
               <div className="flex items-center justify-between mb-5">
                 <div className="loading-bar h-2 w-24 rounded" />
                 <div className="loading-bar h-2 w-16 rounded" />
@@ -420,10 +436,8 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
               </div>
             </div>
           ))}
-
-          {/* Placeholders while loading more */}
           {loadingMore && Array.from({ length: 4 }).map((_, i) => (
-            <div key={`more-${i}`} className="bg-white p-8 lg:p-9">
+            <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
               <div className="flex items-center justify-between mb-5">
                 <div className="loading-bar h-2 w-24 rounded" />
                 <div className="loading-bar h-2 w-16 rounded" />
@@ -440,21 +454,19 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
       {/* Footer actions */}
       {done && (
         <div className="mt-12">
-          {/* Generate more */}
           {!loadingMore && (
             <button
               onClick={() => runSimulation(true)}
-              className="w-full border border-dashed border-zinc-200 py-5 text-sm text-zinc-400 hover:border-zinc-400 hover:text-zinc-700 transition-colors duration-150 flex items-center justify-center gap-2"
+              className="w-full py-5 text-sm flex items-center justify-center gap-2 rounded-2xl transition-colors duration-150"
+              style={{ border: '1.5px dashed #D2D2D7', color: '#6E6E73' }}
             >
               <span className="text-lg leading-none">+</span>
               Generate more perspectives
             </button>
           )}
-
-          {/* Proceed */}
           {cards.length > 0 && (
-            <div className="mt-10 pt-8 border-t border-zinc-100 flex items-center justify-between">
-              <p className="text-sm text-zinc-400 font-light">
+            <div className="mt-10 pt-8 flex items-center justify-between" style={{ borderTop: '1px solid #D2D2D7' }}>
+              <p className="text-sm" style={{ color: '#6E6E73' }}>
                 {cards.length} perspective{cards.length !== 1 ? 's' : ''} selected
               </p>
               <button onClick={onNext} className="btn-primary">
@@ -468,6 +480,5 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
         </div>
       )}
     </main>
-    </>
   );
 }
