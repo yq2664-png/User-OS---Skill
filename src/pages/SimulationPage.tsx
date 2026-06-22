@@ -257,6 +257,9 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
       if (match) {
         try {
           const card = JSON.parse(match[0]);
+          // support both new (perspective) and legacy (persona) format
+          if (!card.perspective && card.persona) card.perspective = card.persona;
+          if (!card.driver && card.emotion) card.driver = card.emotion;
           if (card.perspective && card.thought) newCards.push(card);
         } catch { /* incomplete */ }
       }
