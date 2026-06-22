@@ -456,7 +456,11 @@ CRITICAL: "perspective" must be a motivation, never an occupation or demographic
 }
 
 function buildInsightsPrompt(cards, productName) {
-  const summary = cards.map(c => `[${c.perspective} — driver: ${c.driver}]\nThought: ${c.thought}\nWorry: ${c.worry || ''}\nAssumption: ${c.assumption || ''}`).join('\n\n');
+  const summary = cards.map(c => {
+    const label = c.perspective || c.persona || 'User';
+    const driver = c.driver || c.emotion || '';
+    return `[${label}${driver ? ` — ${driver}` : ''}]\nThought: ${c.thought}${c.worry ? `\nWorry: ${c.worry}` : ''}${c.assumption ? `\nAssumption: ${c.assumption}` : ''}`;
+  }).join('\n\n');
   return `You are a senior design researcher synthesizing behavioral insights for ${productName}. Your job is to go beyond surface summaries and extract the underlying behavioral patterns.
 
 User perspectives collected:

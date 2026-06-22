@@ -17,21 +17,26 @@ function HighlightedThought({ thought, highlight }: { thought: string; highlight
 }
 
 function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onRemove: () => void }) {
-  const [expanded, setExpanded] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const hasDetail = card.worry || card.assumption || card.driver;
   return (
     <div
       className="card-enter perspective-card relative group"
       style={{
         animationDelay: `${index * 80}ms`,
         background: 'white',
+        padding: '32px',
         borderRadius: '20px',
-        outline: expanded ? '2px solid #1D1D1F' : '2px solid transparent',
-        transition: 'outline 0.1s',
+        outline: hovered ? '2px solid #1D1D1F' : '2px solid transparent',
+        transform: hovered ? 'translateY(-2px)' : 'none',
+        transition: 'transform 0.24s cubic-bezier(0.4,0,0.6,1), outline 0.1s',
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <button
         onClick={onRemove}
-        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10"
+        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
         style={{ color: '#D2D2D7' }}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -39,30 +44,45 @@ function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onR
         </svg>
       </button>
 
-      <button className="w-full text-left p-8" onClick={() => setExpanded(e => !e)}>
-        <p className="text-xs font-medium mb-4" style={{ color: '#0071E3' }}>{card.perspective}</p>
-        <p className="text-lg sm:text-xl leading-relaxed mb-4">
-          "<HighlightedThought thought={card.thought} highlight={card.highlight} />"
-        </p>
-        <p className="text-xs leading-snug" style={{ color: '#6E6E73' }}>{card.driver}</p>
-      </button>
+      <div className="flex items-center justify-between mb-5">
+        <span className="text-[10px] tracking-[0.18em] uppercase" style={{ color: '#6E6E73' }}>
+          {card.perspective}
+        </span>
+        {card.driver && (
+          <span className="text-[10px] tracking-[0.12em] uppercase" style={{ color: '#1D1D1F' }}>
+            {card.driver.slice(0, 24)}{card.driver.length > 24 ? '…' : ''}
+          </span>
+        )}
+      </div>
 
-      {expanded && (card.worry || card.assumption) && (
-        <div className="px-8 pb-8 space-y-3">
-          <div style={{ borderTop: '1px solid #F5F5F7', paddingTop: '16px' }}>
-            {card.worry && (
-              <div className="mb-3">
-                <p className="text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: '#D2D2D7' }}>Worry</p>
-                <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{card.worry}</p>
-              </div>
-            )}
-            {card.assumption && (
-              <div>
-                <p className="text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: '#D2D2D7' }}>Assumption</p>
-                <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{card.assumption}</p>
-              </div>
-            )}
-          </div>
+      <p className="text-lg sm:text-xl leading-relaxed">
+        "<HighlightedThought thought={card.thought} highlight={card.highlight} />"
+      </p>
+
+      {/* Hover tooltip showing worry + assumption */}
+      {hovered && hasDetail && (
+        <div
+          className="absolute bottom-full left-0 mb-2 z-20 w-full p-5 pointer-events-none card-enter rounded-2xl"
+          style={{ background: '#1D1D1F', animationDelay: '0ms' }}
+        >
+          {card.driver && (
+            <div className="mb-3">
+              <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Goal</p>
+              <p className="text-xs leading-relaxed text-white">{card.driver}</p>
+            </div>
+          )}
+          {card.worry && (
+            <div className="mb-3">
+              <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Worry</p>
+              <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.worry}</p>
+            </div>
+          )}
+          {card.assumption && (
+            <div>
+              <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Assumption</p>
+              <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.assumption}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
