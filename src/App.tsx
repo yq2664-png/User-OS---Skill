@@ -32,19 +32,13 @@ export interface FormData {
   documents: File[];
 }
 
-export interface CardBackground {
-  name: string;
-  age: number;
-  job: string;
-  context: string;
-}
-
 export interface Card {
-  persona: string;
-  emotion: string;
-  thought: string;
+  perspective: string;   // motivation-based label e.g. "Looking for Simplicity"
+  driver: string;        // what the user is trying to achieve
+  thought: string;       // first-person reaction
   highlight?: string;
-  background?: CardBackground;
+  worry?: string;        // what they're afraid of
+  assumption?: string;   // underlying belief driving their behavior
 }
 
 export interface RealCard {
@@ -57,14 +51,17 @@ export interface RealCard {
 }
 
 export type ImpactLevel = 'Critical' | 'High' | 'Medium' | 'Low';
+export type EffortLevel = 'High' | 'Medium' | 'Low';
 
 export interface InsightItem {
   rank: number;
   title: string;
-  description: string;
-  score: number;       // 1–10
+  observation: string;
+  interpretation: string;
+  behavioralInsight: string;
+  score: number;
   impact: ImpactLevel;
-  valueNote: string;   // one-line reason this matters to the business
+  valueNote: string;
 }
 
 export interface Insights {
@@ -79,6 +76,9 @@ export interface PRDSection {
   id: number;
   name: string;
   priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  impact: 'High' | 'Medium' | 'Low';
+  confidence: number;   // 0–100
+  effort: EffortLevel;
   problem: string;
   userStory: string;
   requirement: string;

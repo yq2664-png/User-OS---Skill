@@ -90,11 +90,34 @@ function InsightRow({
 
       {/* Content */}
       <div className="flex-1 min-w-0 pt-0.5">
-        <div className="flex items-start justify-between gap-3 mb-1.5">
+        <div className="flex items-start justify-between gap-3 mb-3">
           <p className="text-sm font-semibold leading-snug" style={{ color: '#1D1D1F' }}>{item.title}</p>
           <span className="text-[9px] tracking-widest uppercase shrink-0" style={{ color }}>{impact}</span>
         </div>
-        <p className="text-sm leading-relaxed mb-2" style={{ color: '#6E6E73' }}>{item.description}</p>
+
+        {/* Behavioral Insight — the headline finding */}
+        {item.behavioralInsight && (
+          <p className="text-sm font-medium leading-snug mb-3 italic" style={{ color: '#1D1D1F' }}>
+            "{item.behavioralInsight}"
+          </p>
+        )}
+
+        {/* Observation → Interpretation */}
+        <div className="space-y-2 mb-3">
+          {item.observation && (
+            <div className="flex gap-2">
+              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#D2D2D7' }}>Observed</span>
+              <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.observation}</p>
+            </div>
+          )}
+          {item.interpretation && (
+            <div className="flex gap-2">
+              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#D2D2D7' }}>Why</span>
+              <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.interpretation}</p>
+            </div>
+          )}
+        </div>
+
         {item.valueNote && (
           <p className="text-xs leading-relaxed pl-2" style={{ color: '#6E6E73', borderLeft: '2px solid #D2D2D7' }}>
             {item.valueNote}
@@ -458,7 +481,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
               disabled={selected.size === 0}
               className={`btn-primary ${selected.size === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
             >
-              Generate PRD
+              Generate Decisions
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

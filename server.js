@@ -401,7 +401,7 @@ app.post('/api/prd', async (req, res) => {
 // ── Prompt builders ───────────────────────────────────────────────────────────
 function buildSimulatePrompt(name, type, functions, existingPersonas = [], count = 8, featureConstraints = [], timeConstraints = [], productStage = '', webLink = '', webContent = '') {
   const exclude = existingPersonas.length > 0
-    ? `\nAvoid these already-used personas: ${existingPersonas.join(', ')}.`
+    ? `\nAvoid these already-used perspectives: ${existingPersonas.join(', ')}.`
     : '';
 
   const fcSection = featureConstraints.length > 0
@@ -421,52 +421,61 @@ function buildSimulatePrompt(name, type, functions, existingPersonas = [], count
     ? `\nWebsite Content (scraped from ${webLink}):\n${webContent}`
     : '';
 
-  return `You are simulating authentic, unfiltered user perspectives for a product. Be honest and reveal real friction, confusion, excitement, and hesitation.
+  return `You are a design researcher simulating authentic user perspectives for a product. Your goal is to reveal WHY users behave a certain way — their motivations, fears, mental models, and assumptions — not WHO they are demographically.
 
 Product Name: ${name}
 Product Stage: ${stageLabel}
 Product Type: ${type || 'Not specified'}
 Description / Requirements: ${functions || 'Not provided'}${webSection}${fcSection}${tcSection}
 
-Generate exactly ${count} distinct user perspective cards. Each card represents a different user type encountering this product for the first time.${exclude}
+Generate exactly ${count} distinct behavioral perspective cards. Each card represents a different motivational state a user might bring to this product.${exclude}
 
 Output ONLY the cards separated by ---CARD--- with no other text before, between, or after.
 
 Each card must be valid standalone JSON with this exact structure:
 {
-  "persona": "Power User",
-  "emotion": "Frustrated",
-  "thought": "A short, punchy first-person reaction. MAXIMUM 20 words. No filler.",
-  "highlight": "the most revealing 3-6 word phrase from the thought",
-  "background": {
-    "name": "A realistic full name",
-    "age": 34,
-    "job": "Specific job title and company type",
-    "context": "One sentence about their relevant experience or situation"
-  }
+  "perspective": "Looking for Simplicity",
+  "driver": "What this user is trying to achieve in one sentence",
+  "thought": "A sharp, first-person reaction revealing their mental model. MAXIMUM 20 words.",
+  "highlight": "the most revealing 3-6 word phrase verbatim from thought",
+  "worry": "What they're secretly afraid of or guarding against",
+  "assumption": "The underlying belief driving their behavior"
 }
 
-Persona types to use (each once): Early Adopter, Skeptic, Busy Professional, Power User, Casual User, Enterprise Buyer, Technical Expert, Non-Technical User
+Perspective types to use (each once, rephrase naturally for this product):
+- Looking for Simplicity
+- Afraid of Commitment
+- Seeking Control
+- Risk-Aware
+- Looking for Guidance
+- Efficiency-Oriented
+- Skeptical of Value
+- Overwhelmed by Options
 
-Emotion options: Excited, Confused, Frustrated, Curious, Skeptical, Overwhelmed, Delighted, Anxious
-
-CRITICAL: Keep "thought" under 20 words. Make it sharp and specific, not generic. The "highlight" must be a verbatim substring of "thought".`;
+CRITICAL: "perspective" must be a motivation, never an occupation or demographic. "thought" must be under 20 words and specific to this product. "highlight" must be a verbatim substring of "thought".`;
 }
 
 function buildInsightsPrompt(cards, productName) {
-  const summary = cards.map(c => `[${c.persona} — ${c.emotion}] ${c.thought}`).join('\n\n');
-  return `You are a senior product researcher analyzing user interview data for ${productName}.
+  const summary = cards.map(c => `[${c.perspective} — driver: ${c.driver}]\nThought: ${c.thought}\nWorry: ${c.worry || ''}\nAssumption: ${c.assumption || ''}`).join('\n\n');
+  return `You are a senior design researcher synthesizing behavioral insights for ${productName}. Your job is to go beyond surface summaries and extract the underlying behavioral patterns.
 
 User perspectives collected:
 ${summary}
 
-Extract structured insights with severity scoring. Return ONLY valid JSON with this exact structure:
+For each insight, use this reasoning structure:
+- Observation: what you can directly observe from the perspectives
+- Interpretation: what this behavior means (the "why")
+- Behavioral Insight: a sharp, reusable design principle (e.g. "Power appears before value", "Flexibility creates decision paralysis")
+
+Return ONLY valid JSON with this exact structure:
 {
   "frustrations": [
     {
       "rank": 1,
       "title": "Concise title (5 words max)",
-      "description": "What frustrates users and why it matters — specific and concrete",
+      "observation": "What users directly experience or do",
+      "interpretation": "Why this behavior occurs — the underlying cause",
+      "behavioralInsight": "Sharp, reusable principle. E.g. 'Trust is lost faster than functionality.'",
       "score": 8.5,
       "impact": "Critical",
       "valueNote": "One sentence: business or retention consequence if left unaddressed"
@@ -478,38 +487,47 @@ Extract structured insights with severity scoring. Return ONLY valid JSON with t
   "opportunities": [...]
 }
 
-Scoring rules:
-- score: float 1.0–10.0, one decimal place, based on frequency × severity × business impact
-- impact: "Critical" (score 8–10), "High" (6–7.9), "Medium" (4–5.9), "Low" (1–3.9)
-- Sort each array by score descending
-- Each array: 3–4 items. Be concrete and specific, not generic.`;
+Rules:
+- score: float 1.0–10.0 based on frequency × severity × business impact
+- impact: "Critical" (8–10), "High" (6–7.9), "Medium" (4–5.9), "Low" (1–3.9)
+- behavioralInsight must read like a design research finding, not a feature summary
+- Bad: "Users are confused." Good: "Complexity is tolerated only after value is proven."
+- Sort each array by score descending. Each array: 3–4 items.`;
 }
 
 function buildPRDPrompt(productName, insights) {
-  return `You are a principal product manager writing a requirements document for ${productName} based on user research.
+  return `You are a principal product strategist translating behavioral research into product decisions for ${productName}.
 
 Research insights:
 ${JSON.stringify(insights, null, 2)}
 
-Generate a focused PRD. Return ONLY valid JSON:
+Generate a focused set of product decisions grounded in the behavioral insights above. Return ONLY valid JSON:
 {
-  "title": "${productName} — Product Requirements Document",
+  "title": "${productName} — Product Decision Framework",
   "sections": [
     {
       "id": 1,
-      "name": "Short name for this requirement (3-5 words max)",
+      "name": "Short name for this decision (3-5 words max)",
       "priority": "Critical",
-      "problem": "Specific, concrete problem statement derived from user research",
-      "userStory": "As a [specific user type], I want [concrete capability] so that [real measurable outcome]",
-      "requirement": "Clear, testable product requirement that addresses the problem",
-      "successMetric": "Specific, measurable KPI or outcome that defines success"
+      "impact": "High",
+      "confidence": 85,
+      "effort": "Medium",
+      "problem": "Specific behavioral problem statement derived from the insights",
+      "userStory": "When a user is [behavioral state], they need [capability] so they can [outcome]",
+      "requirement": "Clear, testable product requirement that addresses the behavioral problem",
+      "successMetric": "Specific, measurable outcome that signals the behavior has changed"
     }
   ]
 }
 
-Generate 5-6 sections. Each must address a distinct need from the insights. No filler — every section must be actionable.
-priority must be one of: "Critical", "High", "Medium", "Low" — assign based on impact severity from the insights.
-Sort sections by priority descending (Critical first).`;
+Generate 5-6 sections. Rules:
+- priority: "Critical" | "High" | "Medium" | "Low" — based on impact severity
+- impact: "High" | "Medium" | "Low" — business value if addressed
+- confidence: 0–100 integer — how strongly the research supports this decision
+- effort: "High" | "Medium" | "Low" — estimated implementation complexity
+- userStory must reference a behavioral state, not a demographic role
+- successMetric must describe a behavioral change, not just a feature metric
+- Sort by priority descending (Critical first).`;
 }
 
 // Serve frontend in production

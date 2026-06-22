@@ -38,7 +38,6 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
       className="card-enter flex"
       style={{ animationDelay: `${index * 80}ms`, borderBottom: '1px solid #F5F5F7' }}
     >
-      {/* Priority color bar */}
       <div className="w-[3px] shrink-0" style={{ background: color }} />
 
       <div className="flex-1 min-w-0">
@@ -48,9 +47,25 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
           style={{ background: expanded ? '#F5F5F7' : 'white' }}
         >
           <span className="text-sm font-semibold truncate" style={{ color: '#1D1D1F' }}>
-            {section.name || `Recommendation ${section.id}`}
+            {section.name || `Decision ${section.id}`}
           </span>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-4 shrink-0">
+            {/* Impact / Confidence / Effort */}
+            {section.impact && (
+              <span className="text-[9px] tracking-widest uppercase hidden sm:block" style={{ color: '#6E6E73' }}>
+                Impact: {section.impact}
+              </span>
+            )}
+            {section.confidence != null && (
+              <span className="text-[9px] tracking-widest uppercase hidden sm:block" style={{ color: '#6E6E73' }}>
+                {section.confidence}% confidence
+              </span>
+            )}
+            {section.effort && (
+              <span className="text-[9px] tracking-widest uppercase hidden sm:block" style={{ color: '#6E6E73' }}>
+                Effort: {section.effort}
+              </span>
+            )}
             <span className="text-[9px] tracking-widest uppercase" style={{ color }}>
               {section.priority}
             </span>
@@ -65,20 +80,45 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
         </button>
 
         {expanded && (
-          <div className="grid grid-cols-1 lg:grid-cols-4" style={{ borderTop: '1px solid #D2D2D7' }}>
-            {cells.map((cell, ci) => (
-              <div
-                key={ci}
-                className="p-6"
-                style={{
-                  borderRight: ci < cells.length - 1 ? '1px solid #D2D2D7' : 'none',
-                  borderTop: ci > 0 ? '1px solid #D2D2D7' : 'none',
-                }}
-              >
-                <p className="label-tag mb-2">{COL_HEADERS[ci]}</p>
-                <p className="text-sm leading-relaxed" style={{ color: '#1D1D1F' }}>{cell}</p>
+          <div style={{ borderTop: '1px solid #D2D2D7' }}>
+            {/* Strategy signals */}
+            {(section.impact || section.confidence != null || section.effort) && (
+              <div className="flex items-center gap-6 px-6 py-3" style={{ borderBottom: '1px solid #F5F5F7', background: '#F5F5F7' }}>
+                {section.impact && (
+                  <div>
+                    <p className="text-[9px] tracking-widest uppercase mb-0.5" style={{ color: '#D2D2D7' }}>Impact</p>
+                    <p className="text-xs font-medium" style={{ color: '#1D1D1F' }}>{section.impact}</p>
+                  </div>
+                )}
+                {section.confidence != null && (
+                  <div>
+                    <p className="text-[9px] tracking-widest uppercase mb-0.5" style={{ color: '#D2D2D7' }}>Confidence</p>
+                    <p className="text-xs font-medium" style={{ color: '#1D1D1F' }}>{section.confidence}%</p>
+                  </div>
+                )}
+                {section.effort && (
+                  <div>
+                    <p className="text-[9px] tracking-widest uppercase mb-0.5" style={{ color: '#D2D2D7' }}>Effort</p>
+                    <p className="text-xs font-medium" style={{ color: '#1D1D1F' }}>{section.effort}</p>
+                  </div>
+                )}
               </div>
-            ))}
+            )}
+            <div className="grid grid-cols-1 lg:grid-cols-4">
+              {cells.map((cell, ci) => (
+                <div
+                  key={ci}
+                  className="p-6"
+                  style={{
+                    borderRight: ci < cells.length - 1 ? '1px solid #D2D2D7' : 'none',
+                    borderTop: ci > 0 ? '1px solid #D2D2D7' : 'none',
+                  }}
+                >
+                  <p className="label-tag mb-2">{COL_HEADERS[ci]}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: '#1D1D1F' }}>{cell}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -199,7 +239,7 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
         <p className="label-tag mb-6">{productName}</p>
         <div className="flex items-end gap-5">
           <h1 className="font-semibold text-[#1D1D1F] leading-tight" style={{ fontSize: 'clamp(32px, 4vw, 48px)', letterSpacing: '-0.3px' }}>
-            Recommend Product<br />Decision
+            Product Decisions
           </h1>
           {loading && (
             <div className="flex items-center gap-1.5 mb-2.5">
@@ -211,7 +251,7 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
         </div>
         {!loading && prdData && (
           <p className="mt-3 text-sm" style={{ color: '#6E6E73' }}>
-            {prdData.sections.length} recommendations · click any row to expand
+            {prdData.sections.length} decisions · click any row to expand
           </p>
         )}
 

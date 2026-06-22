@@ -17,47 +17,52 @@ function HighlightedThought({ thought, highlight }: { thought: string; highlight
 }
 
 function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onRemove: () => void }) {
-  const [hovered, setHovered] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   return (
     <div
       className="card-enter perspective-card relative group"
       style={{
         animationDelay: `${index * 80}ms`,
         background: 'white',
-        padding: '32px',
         borderRadius: '20px',
-        outline: hovered ? '2px solid #1D1D1F' : '2px solid transparent',
-        transform: hovered ? 'translateY(-2px)' : 'none',
-        transition: 'transform 0.24s cubic-bezier(0.4,0,0.6,1), outline 0.1s',
+        outline: expanded ? '2px solid #1D1D1F' : '2px solid transparent',
+        transition: 'outline 0.1s',
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       <button
         onClick={onRemove}
-        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10"
         style={{ color: '#D2D2D7' }}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </button>
-      <div className="flex items-center justify-between mb-5">
-        <span className="text-[10px] tracking-[0.18em] uppercase" style={{ color: '#6E6E73' }}>{card.persona}</span>
-        <span className="text-[10px] tracking-[0.12em] uppercase" style={{ color: '#1D1D1F' }}>{card.emotion}</span>
-      </div>
-      <p className="text-lg sm:text-xl leading-relaxed">
-        "<HighlightedThought thought={card.thought} highlight={card.highlight} />"
-      </p>
-      {card.background && hovered && (
-        <div className="absolute bottom-full left-0 mb-2 z-20 w-full text-white p-5 pointer-events-none card-enter rounded-2xl"
-          style={{ background: '#1D1D1F', animationDelay: '0ms' }}>
-          <div className="flex items-baseline justify-between mb-3">
-            <span className="text-sm font-semibold">{card.background.name}</span>
-            <span className="text-[10px] ml-2" style={{ color: '#6E6E73' }}>{card.background.age}</span>
+
+      <button className="w-full text-left p-8" onClick={() => setExpanded(e => !e)}>
+        <p className="text-xs font-medium mb-4" style={{ color: '#0071E3' }}>{card.perspective}</p>
+        <p className="text-lg sm:text-xl leading-relaxed mb-4">
+          "<HighlightedThought thought={card.thought} highlight={card.highlight} />"
+        </p>
+        <p className="text-xs leading-snug" style={{ color: '#6E6E73' }}>{card.driver}</p>
+      </button>
+
+      {expanded && (card.worry || card.assumption) && (
+        <div className="px-8 pb-8 space-y-3">
+          <div style={{ borderTop: '1px solid #F5F5F7', paddingTop: '16px' }}>
+            {card.worry && (
+              <div className="mb-3">
+                <p className="text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: '#D2D2D7' }}>Worry</p>
+                <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{card.worry}</p>
+              </div>
+            )}
+            {card.assumption && (
+              <div>
+                <p className="text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: '#D2D2D7' }}>Assumption</p>
+                <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{card.assumption}</p>
+              </div>
+            )}
           </div>
-          <p className="text-[10px] tracking-wide uppercase mb-2" style={{ color: '#6E6E73' }}>{card.background.job}</p>
-          <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{card.background.context}</p>
         </div>
       )}
     </div>
@@ -209,7 +214,7 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
     body.append('timeConstraints', JSON.stringify(formData.timeConstraints));
     if (more) {
       body.append('count', '4');
-      body.append('existingPersonas', JSON.stringify(cardsRef.current.map(c => c.persona)));
+      body.append('existingPersonas', JSON.stringify(cardsRef.current.map(c => c.perspective)));
     }
     for (const file of formData.screenshots) body.append('screenshots', file);
     for (const file of formData.documents) body.append('documents', file);
@@ -252,13 +257,13 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
       if (match) {
         try {
           const card = JSON.parse(match[0]);
-          if (card.persona && card.emotion && card.thought) newCards.push(card);
+          if (card.perspective && card.thought) newCards.push(card);
         } catch { /* incomplete */ }
       }
     }
     if (newCards.length > 0) {
       const result = append
-        ? [...cardsRef.current, ...newCards.filter(n => !cardsRef.current.find(c => c.persona === n.persona))]
+        ? [...cardsRef.current, ...newCards.filter(n => !cardsRef.current.find(c => c.perspective === n.perspective))]
         : newCards;
       if (result.length > cardsRef.current.length || (!append && newCards.length > 0)) {
         cardsRef.current = result;
@@ -285,7 +290,7 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
         <p className="label-tag mb-6">{formData.productName}</p>
         <div className="flex items-end gap-6">
           <h1 className="font-semibold text-[#1D1D1F] leading-tight" style={{ fontSize: 'clamp(32px, 4vw, 48px)', letterSpacing: '-0.3px' }}>
-            User Perspectives
+            Behavioral Perspectives
           </h1>
           {isLoading && (
             <div className="flex items-center gap-1.5 mb-2.5">
@@ -297,7 +302,7 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
         </div>
         {done && cards.length > 0 && (
           <p className="mt-3 text-sm" style={{ color: '#6E6E73' }}>
-            {cards.length} perspectives · hover a card to see persona details · click × to remove
+            {cards.length} behavioral perspectives · click a card to reveal worry & assumption · × to remove
           </p>
         )}
 
@@ -415,7 +420,7 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
       {showReal && done && (cards.length > 0 || loadingMore) && (
         <div className="flex items-baseline gap-4 mb-3 card-enter" style={{ animationDelay: '0ms' }}>
           <h2 className="text-2xl font-semibold" style={{ color: '#1D1D1F' }}>Simulated Perspectives</h2>
-          <span className="text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>AI-generated</span>
+          <span className="text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>Behavioral simulation</span>
         </div>
       )}
 
