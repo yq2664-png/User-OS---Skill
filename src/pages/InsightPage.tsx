@@ -118,7 +118,7 @@ function InsightRow({
           )}
         </div>
 
-        {item.valueNote && (
+        {false && item.valueNote && (
           <p className="text-xs leading-relaxed pl-2" style={{ color: '#6E6E73', borderLeft: '2px solid #D2D2D7' }}>
             {item.valueNote}
           </p>

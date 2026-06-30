@@ -16,8 +16,15 @@ function HighlightedThought({ thought, highlight }: { thought: string; highlight
   );
 }
 
+// Fallback identity pools for cards that arrive without a name/age/occupation.
+const FALLBACK_NAMES = ['Marcus', 'Emily', 'Aiden', 'Sarah', 'Daniel', 'Leo', 'Priya', 'Claire', 'Noah', 'Maya', 'Owen', 'Zoe'];
+const FALLBACK_JOBS = ['Product Manager', 'UX Designer', 'Student', 'Small Business Owner', 'Engineer', 'Marketer', 'Researcher', 'Consultant'];
+
 function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onRemove: () => void }) {
   const [hovered, setHovered] = useState(false);
+  const name = card.name || FALLBACK_NAMES[index % FALLBACK_NAMES.length];
+  const occupation = card.occupation || FALLBACK_JOBS[index % FALLBACK_JOBS.length];
+  const age = card.age || 28 + (index % 18);
   const hasDetail = card.worry || card.assumption || card.driver;
   return (
     <div
@@ -48,11 +55,10 @@ function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onR
         <span className="text-[10px] tracking-[0.18em] uppercase" style={{ color: '#6E6E73' }}>
           {card.perspective}
         </span>
-        {card.driver && (
-          <span className="text-[10px] tracking-[0.12em] uppercase" style={{ color: '#1D1D1F' }}>
-            {card.driver.slice(0, 24)}{card.driver.length > 24 ? '…' : ''}
-          </span>
-        )}
+        {/* Person name — hover reveals occupation & age */}
+        <span className="text-xs font-semibold" style={{ color: '#1D1D1F' }}>
+          {name}
+        </span>
       </div>
 
       <p className="text-lg sm:text-xl leading-relaxed">
@@ -65,6 +71,11 @@ function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onR
           className="absolute bottom-full left-0 mb-2 z-20 w-full p-5 pointer-events-none card-enter rounded-2xl"
           style={{ background: '#1D1D1F', animationDelay: '0ms' }}
         >
+          {/* Persona identity */}
+          <div className="mb-3 pb-3" style={{ borderBottom: '1px solid #3A3A3C' }}>
+            <p className="text-sm font-semibold text-white">{name}, {age}</p>
+            <p className="text-xs mt-0.5" style={{ color: '#8A8F98' }}>{occupation}</p>
+          </div>
           {card.driver && (
             <div className="mb-3">
               <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Goal</p>

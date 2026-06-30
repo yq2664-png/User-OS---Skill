@@ -39,6 +39,9 @@ export interface Card {
   highlight?: string;
   worry?: string;        // what they're afraid of
   assumption?: string;   // underlying belief driving their behavior
+  name?: string;         // humanised persona name e.g. "Marcus"
+  age?: number;          // persona age
+  occupation?: string;   // persona occupation
 }
 
 export interface RealCard {

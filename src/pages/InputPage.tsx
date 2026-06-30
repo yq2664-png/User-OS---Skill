@@ -25,6 +25,9 @@ const STAGES: { id: ProductStage; label: string; desc: string }[] = [
   { id: 'client',     label: 'Client App',   desc: 'Desktop or mobile app'       },
 ];
 
+// Markdown skill file users can download from GitHub and install into their LLM.
+const SKILL_URL = 'https://raw.githubusercontent.com/yq2664-png/User-OS---Skill/main/SKILL.md';
+
 interface VerifyResult {
   name: string;
   tagline: string;
@@ -83,7 +86,12 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
     (stage === 'web' && formData.webLink.trim()) ||
     (stage === 'client' && formData.productName.trim());
 
-  const canSubmitDirect = stage === 'unpublished' && formData.productName.trim();
+  // Unpublished requires the product name AND at least one of Design Documents / Context.
+  const hasDocOrContext = formData.documents.length > 0 || formData.requirements.trim().length > 0;
+  const canSubmitDirect =
+    stage === 'unpublished' && formData.productName.trim() && hasDocOrContext;
+  const showUnpubChoiceHint =
+    stage === 'unpublished' && formData.productName.trim() && !hasDocOrContext;
 
   async function verify() {
     setVerifyStatus('loading');
@@ -231,7 +239,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
             {/* Design documents */}
             {stage === 'unpublished' && (
               <div>
-                <label className="label-tag block mb-2">Design Documents <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span></label>
+                <label className="label-tag block mb-2">Design Documents</label>
                 <button
                   type="button"
                   onClick={() => docRef.current?.click()}
@@ -261,13 +269,31 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                     ))}
                   </div>
                 )}
+
+                {/* Skill recommendation hint */}
+                <p className="text-xs leading-relaxed mt-3" style={{ color: '#8E8E93' }}>
+                  For local or code-based projects, we recommend using the{' '}
+                  <a
+                    href={SKILL_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2"
+                    style={{ color: '#0071E3' }}
+                  >
+                    skill
+                  </a>
+                  {' '}— a Markdown file you download from GitHub and install into your LLM to generate context automatically.
+                </p>
               </div>
             )}
 
             {/* Context */}
             <div>
               <label className="label-tag block mb-2">
-                Context <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span>
+                Context
+                {stage === 'unpublished'
+                  ? <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>or design documents above</span>
+                  : <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span>}
               </label>
               <textarea
                 className="w-full text-[#1D1D1F] outline-none rounded-xl px-4 py-3 resize-none"
@@ -291,16 +317,31 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
           <div className="py-10">
             {/* Unpublished: direct submit */}
             {stage === 'unpublished' && (
-              <button
-                onClick={onSubmit}
-                disabled={!canSubmitDirect}
-                className={`btn-primary ${!canSubmitDirect ? 'opacity-30 cursor-not-allowed' : ''}`}
-              >
-                Generate User Perspectives
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
+              <>
+                {showUnpubChoiceHint && (
+                  <div className="flex items-start gap-2.5 mb-4 p-4 rounded-xl" style={{ background: '#F5F5F7' }}>
+                    <span className="mt-0.5 shrink-0" style={{ color: '#0071E3' }}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
+                        <path d="M7 4v3.5M7 10h.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>
+                      Add at least one — a <span style={{ color: '#1D1D1F', fontWeight: 600 }}>design document</span> or some <span style={{ color: '#1D1D1F', fontWeight: 600 }}>context</span> — so we can simulate meaningful perspectives.
+                    </p>
+                  </div>
+                )}
+                <button
+                  onClick={onSubmit}
+                  disabled={!canSubmitDirect}
+                  className={`btn-primary ${!canSubmitDirect ? 'opacity-30 cursor-not-allowed' : ''}`}
+                >
+                  Generate User Perspectives
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </>
             )}
 
             {/* Web / Client: verify flow */}

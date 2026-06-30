@@ -1,3 +1,5 @@
+import Hero from '../components/Hero';
+
 interface Props {
   onStart: () => void;
 }
@@ -47,30 +49,11 @@ export default function LandingPage({ onStart }: Props) {
   return (
     <main>
 
-      {/* ── Hero ──────────────────────────────────────────────── */}
-      <section className="page-container pt-20 pb-20 sm:pt-32 sm:pb-28">
-        <p className="label-tag mb-6">User Perspective Simulator</p>
-        <h1
-          className="font-semibold text-[#1D1D1F] max-w-3xl mb-6"
-          style={{ fontSize: 'clamp(40px, 5vw, 64px)', lineHeight: '1.06', letterSpacing: '-0.5px' }}
-        >
-          Discover what users need<br />before they tell you.
-        </h1>
-        <p className="text-[#6E6E73] text-lg max-w-xl leading-relaxed mb-10" style={{ fontWeight: 400 }}>
-          Paste in a product description. Get AI-generated user perspectives,
-          behavioral insights, and a PRD — grounded in how real people think.
-        </p>
-        <button onClick={onStart} className="btn-primary text-base" style={{ padding: '14px 28px' }}>
-          Start here
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </section>
+      <Hero onStart={onStart} />
 
       {/* ── How it works ──────────────────────────────────────── */}
       <section style={{ background: '#F5F5F7' }}>
-        <div className="page-container py-16 sm:py-20">
+        <div className="page-container py-10 sm:py-12">
           <p className="section-title">How it works</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {STEPS.map((step) => (
@@ -90,7 +73,7 @@ export default function LandingPage({ onStart }: Props) {
       </section>
 
       {/* ── Features ──────────────────────────────────────────── */}
-      <section className="page-container py-16 sm:py-20">
+      <section className="page-container py-10 sm:py-12">
         <p className="section-title">What you get</p>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {FEATURES.map((f) => (

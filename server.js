@@ -373,11 +373,14 @@ Be concise and accurate. Base everything strictly on what is on the page.`,
 // ── Insights ──────────────────────────────────────────────────────────────────
 app.post('/api/insights', async (req, res) => {
   const { cards, productName } = req.body;
+  if (!cards || cards.length === 0) {
+    return res.status(400).json({ error: 'No perspective cards provided' });
+  }
   try {
-    const message = await claudeCreate('claude-opus-4-8', 3000, [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]);
+    const message = await claudeCreate('claude-opus-4-8', 6000, [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]);
     const text = message.content[0].text;
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) res.json(JSON.parse(match[0]));
+    const parsed = extractJSON(text);
+    if (parsed) res.json(parsed);
     else res.status(500).json({ error: 'Parse failed' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -388,15 +391,27 @@ app.post('/api/insights', async (req, res) => {
 app.post('/api/prd', async (req, res) => {
   const { productName, insights } = req.body;
   try {
-    const message = await claudeCreate('claude-opus-4-8', 4000, [{ role: 'user', content: buildPRDPrompt(productName, insights) }]);
+    const message = await claudeCreate('claude-opus-4-8', 5000, [{ role: 'user', content: buildPRDPrompt(productName, insights) }]);
     const text = message.content[0].text;
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) res.json(JSON.parse(match[0]));
+    const parsed = extractJSON(text);
+    if (parsed) res.json(parsed);
     else res.status(500).json({ error: 'Parse failed' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+function extractJSON(text) {
+  // Try code fence first
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const candidates = fence ? [fence[1], text] : [text];
+  for (const src of candidates) {
+    const match = src.match(/\{[\s\S]*\}/);
+    if (!match) continue;
+    try { return JSON.parse(match[0]); } catch {}
+  }
+  return null;
+}
 
 // ── Prompt builders ───────────────────────────────────────────────────────────
 function buildSimulatePrompt(name, type, functions, existingPersonas = [], count = 8, featureConstraints = [], timeConstraints = [], productStage = '', webLink = '', webContent = '') {
@@ -435,12 +450,17 @@ Output ONLY the cards separated by ---CARD--- with no other text before, between
 Each card must be valid standalone JSON with this exact structure:
 {
   "perspective": "Looking for Simplicity",
+  "name": "A realistic first name for this person, e.g. Marcus",
+  "age": 34,
+  "occupation": "Their job title, e.g. Product Manager",
   "driver": "What this user is trying to achieve in one sentence",
   "thought": "A sharp, first-person reaction revealing their mental model. MAXIMUM 20 words.",
   "highlight": "the most revealing 3-6 word phrase verbatim from thought",
   "worry": "What they're secretly afraid of or guarding against",
   "assumption": "The underlying belief driving their behavior"
 }
+
+Give each card a different, realistic name, age (20–60), and occupation that fits the perspective and product audience.
 
 Perspective types to use (each once, rephrase naturally for this product):
 - Looking for Simplicity
