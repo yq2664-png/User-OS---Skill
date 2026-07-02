@@ -41,6 +41,33 @@ Give each card a different, realistic name / age / occupation.
 - **Good thought:** "If setup takes more than five minutes I'm gone."
 - The thought must sound like a real person half-thinking it, not a review.
 
+### No mood-only perspectives
+
+Every thought must reveal a **decision, behavior, or mental model** — not just an
+emotion. A feeling with no behavioral consequence is noise.
+
+- **Reject (mood only):** "I'm excited about this!", "This feels overwhelming.",
+  "I love the design.", "Not sure how I feel."
+- **Keep (mood → behavior):** "This feels overwhelming, so I'd only turn on one
+  feature and ignore the rest.", "Looks slick — but I'll wait for reviews before
+  I trust it with real data."
+
+If a thought is purely emotional, rewrite it so it exposes what the user would *do*
+or *believe* as a result.
+
+## Filter before presenting
+
+Generate a few extra candidates, then run one filtering pass **before** showing
+anything. Drop or rewrite any card that:
+
+1. Is **mood-only** (no decision/behavior/belief).
+2. **Duplicates** another card's underlying motivation.
+3. Is **generic** — could apply to any product, not this one.
+4. Has a `highlight` that isn't a verbatim substring of `thought`.
+
+Only present the 8 that survive. Never show the rejects or the filtering process —
+just the clean final set.
+
 ## JSON schema (only if the user asks for JSON)
 
 ```json

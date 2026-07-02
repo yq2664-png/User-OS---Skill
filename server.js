@@ -472,7 +472,11 @@ Perspective types to use (each once, rephrase naturally for this product):
 - Skeptical of Value
 - Overwhelmed by Options
 
-CRITICAL: "perspective" must be a motivation, never an occupation or demographic. "thought" must be under 20 words and specific to this product. "highlight" must be a verbatim substring of "thought".`;
+CRITICAL: "perspective" must be a motivation, never an occupation or demographic. "thought" must be under 20 words and specific to this product. "highlight" must be a verbatim substring of "thought".
+
+NO MOOD-ONLY CARDS: every "thought" must reveal a decision, behavior, or mental model — not just an emotion. Reject "I'm excited!", "This feels overwhelming.", "I love it." Keep feelings only when tied to what the user would DO or BELIEVE (e.g. "This feels overwhelming, so I'd only turn on one feature and ignore the rest.").
+
+FILTER BEFORE OUTPUT: internally consider extra candidates, then output only cards that pass all of: (1) reveals behavior/belief, not mood alone; (2) not a duplicate motivation of another card; (3) specific to THIS product, not generic; (4) highlight is a verbatim substring of thought. Output exactly ${count} cards that survive this filter, with no rejects and no explanation.`;
 }
 
 function buildInsightsPrompt(cards, productName) {
