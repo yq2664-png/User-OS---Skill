@@ -1,7 +1,12 @@
 node_modules/
-.env
 dist/
 .DS_Store
+
+# Environment variables & secrets — never commit these
+.env
+.env.*
+!.env.example
 *.local
 
+# Local Claude Code settings (may contain tokens)
 .claude/settings.local.json
