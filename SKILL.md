@@ -1,68 +1,71 @@
 ---
-name: user-os-context
-description: Generate a structured product-context document for an unpublished or local/code-based project, ready to paste into User Research OS. Use when the user wants to simulate user perspectives for a product that isn't live on the web yet.
+name: user-research-os
+description: Simulate how multiple distinct users would react to a product before real users ever speak, then synthesize behavioral insights and concrete product decisions. Use whenever someone wants pre-launch user research, wants to pressure-test a product idea, asks "how would users react to X", needs a research-backed PRD, or wants to find friction / hidden needs / trust issues in a product or feature.
 ---
 
-# User OS — Context Generator
+# User Research OS
 
-This skill turns a local project (a codebase, a design doc, a rough idea) into a
-clean **product-context document** you can paste straight into the *Context* field
-of [User Research OS](https://github.com/yq2664-png/User-OS---Skill).
+Turn a product description into three research artifacts, in order:
 
-User Research OS simulates how multiple distinct users would think about your
-product *before* you ship. For unpublished or local projects there's no live URL
-to scrape, so the model needs you to describe the product. This skill writes that
-description for you, in the exact shape the simulator works best with.
+1. **Behavioral Perspectives** — 8 distinct users react in their own voice.
+2. **Behavioral Insights** — the patterns and friction underneath those reactions.
+3. **Product Decisions** — a prioritized, evidence-backed set of moves.
+
+This is a design-research reasoning workflow. It runs entirely in the model — no
+API, no server. The value is in the *rigor*: reactions must reveal motivation,
+insights must be reusable principles, and every decision must trace back to a real
+observation.
 
 ## When to use
 
-- The user has a **local or code-based project** (a repo, a Figma export, a spec).
-- The product is **not yet live on the web**.
-- The user says things like "generate context for User Research OS", "describe my
-  product for the simulator", or pastes a folder / file and asks for a product brief.
+Trigger on any of these:
+- "How would users react to <product / feature / idea>?"
+- "Do pre-launch user research on this."
+- "What friction / hidden needs / trust issues does this have?"
+- "Turn this into a research-backed PRD / product decisions."
+- The user pastes a product description, a spec, a landing page, or a repo and
+  asks what users would think.
 
-## What to produce
+## Inputs you need
 
-Read whatever the user gives you — source files, README, design docs, screenshots,
-or a verbal description — and write a single Markdown block with these sections:
+Before starting, make sure you have:
+- **Product name**
+- **What it does** — core functions, in plain language.
+- **Stage** (optional) — pre-launch / live web product / client app. Shapes tone.
+- **Context** (optional) — target audience, known pain points, constraints,
+  research goals. If the user gave a repo or doc, read it for this.
 
-```
-## Product
-<one-line name + what it is>
+If the product description is thin, ask **one** focused question to fill the
+biggest gap, then proceed. Don't interrogate.
 
-## Core functions
-- <function 1: what the user can do>
-- <function 2>
-- <function 3>
-(3–6 bullets, behaviour-focused, not implementation detail)
+## Workflow
 
-## Target users
-<who this is for — roles, contexts, and the job they're hiring the product to do>
+Run the three phases **in order**. Each phase's output feeds the next. Read the
+matching reference file at the start of each phase — the exact schema, quality
+bar, and worked examples live there.
 
-## The problem it solves
-<the underlying pain, stated as the user would feel it>
+### Phase 1 — Behavioral Perspectives
+Read `references/perspectives.md`. Generate 8 perspective cards. Present them, then
+continue (or pause if the user wants to edit the set).
 
-## Known constraints / open questions
-<anything that shapes the experience: platform, pricing model, missing features,
-parts you're unsure about>
-```
+### Phase 2 — Behavioral Insights
+Read `references/insights.md`. Synthesize the 8 perspectives into ranked insights
+across five categories. Present them.
 
-## How to do it well
+### Phase 3 — Product Decisions
+Read `references/decisions.md`. Translate the insights into 5–6 prioritized
+product decisions. Present them as the final deliverable.
 
-1. **Read before you write.** If given a repo, look at the README, the main entry
-   points, routes/screens, and any `docs/` or `design/` folder. If given a single
-   file, read all of it.
-2. **Describe behaviour, not code.** "Users can draft a doc and share a link"
-   beats "exposes a POST /share endpoint". The simulator reasons about people.
-3. **Stay concrete.** Name real features and real audiences. Avoid "powerful",
-   "intuitive", "seamless" — they carry no signal for perspective simulation.
-4. **Surface friction.** The most useful context names where the product is rough,
-   risky, or unclear. That's exactly what the simulator needs to find pain.
-5. **Output the Markdown block only** — the user will paste it directly. No
-   preamble, no "here's your context".
+## Output style
 
-## After generating
+- Default to **readable Markdown** (tables, headers) for a human reader.
+- If the user asks for JSON or wants to pipe it into another tool, emit the exact
+  JSON schemas defined in the reference files instead.
+- Never invent data. Every insight cites a perspective; every decision cites an
+  insight. If evidence is thin, say so and lower the confidence.
 
-Tell the user:
-> Paste this into the **Context** field on the Unpublished tab of User Research OS,
-> then click *Generate User Perspectives*.
+## The one rule that matters
+
+Skip surface summaries. "Users are confused" is worthless. "Complexity is tolerated
+only after value is proven" is a finding you can design against. Every phase should
+move from *what a user said* → *why* → *what to do about it*.
