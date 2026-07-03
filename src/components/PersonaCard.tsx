@@ -38,11 +38,9 @@ export default function PersonaCard({
   // and the bubbles line up with its centre.
   const rot      = isActive ? 0 : rotation;
   const scale    = isHovered ? 1.06 : isCycling ? 1.04 : isAnyActive ? 0.95 : 1;
-  const opacity  = isAnyActive && !isActive ? 0.45 : 1;
+  const opacity  = isHovered ? 0.9 : isCycling ? 0.95 : isAnyActive ? 0.4 : 0.85;
+  const brightness = isHovered ? 0.96 : 1;
   const yLift    = isHovered ? -14 : isCycling ? -8 : 0;
-  const shadow   = isHovered
-    ? '0 28px 64px rgba(0,0,0,0.18), 0 6px 20px rgba(0,0,0,0.10)'
-    : '0 8px 28px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.05)';
   const z = isActive ? 50 : zIndex;
 
   return (
@@ -64,17 +62,14 @@ export default function PersonaCard({
       {isHovered && <PersonaInfoBubble persona={persona} />}
 
       <motion.div
-        animate={{ rotate: rot, scale, opacity, y: yLift, boxShadow: shadow }}
+        animate={{ rotate: rot, scale, opacity, y: yLift, filter: `brightness(${brightness})` }}
         transition={{ type: 'spring', stiffness: 280, damping: 30 }}
         onHoverStart={() => onHover(persona.id)}
         onHoverEnd={() => onHover(null)}
         style={{
           width: cardSize,
           height: cardSize,
-          borderRadius: 22,
-          overflow: 'hidden',
           cursor: 'default',
-          border: '1px solid rgba(255,255,255,0.75)',
           position: 'relative',
           willChange: 'transform',
         }}
@@ -82,7 +77,7 @@ export default function PersonaCard({
         <img
           src={persona.image}
           alt={persona.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           draggable={false}
         />
       </motion.div>
