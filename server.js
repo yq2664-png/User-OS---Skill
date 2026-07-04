@@ -223,7 +223,52 @@ app.post('/api/real-perspectives', async (req, res) => {
     })(),
   ];
 
+  // Parse review bodies out of a page's JSON-LD (schema.org Review objects).
+  // Trustpilot and G2 both embed reviews this way, so one parser covers both.
+  function extractLdReviews(html) {
+    const out = [];
+    const blocks = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+    for (const b of blocks) {
+      let data; try { data = JSON.parse(b[1].trim()); } catch { continue; }
+      const nodes = Array.isArray(data) ? data : (data['@graph'] || [data]);
+      for (const node of nodes) {
+        let reviews = node?.review ?? node?.reviews ?? [];
+        if (!Array.isArray(reviews)) reviews = [reviews];
+        for (const rv of reviews) {
+          const body = rv?.reviewBody || rv?.description;
+          const rating = rv?.reviewRating?.ratingValue;
+          if (body && body.length > 40) out.push(`${rating ? rating + '★ ' : ''}${body.replace(/\s+/g, ' ').slice(0, 400)}`);
+        }
+      }
+    }
+    return out;
+  }
+
+  let host = '';
+  try { host = new URL(webLink || '').hostname.replace(/^www\./, ''); } catch {}
+
   const webSources = [
+
+    // Trustpilot — public review pages keyed by domain
+    ...(host ? [(async () => {
+      const tpUrl = `https://www.trustpilot.com/review/${host}`;
+      const r = await fetch(tpUrl, { headers, signal: AbortSignal.timeout(9000) });
+      if (!r.ok) return;
+      const html = await r.text();
+      extractLdReviews(html).slice(0, 6).forEach(body => addItem('Trustpilot', tpUrl, body));
+    })()] : []),
+
+    // G2 — best-effort; Cloudflare often blocks datacenter IPs. Guess the slug
+    // from the product name; allSettled swallows the frequent 403/404.
+    (async () => {
+      const slug = productName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      if (!slug) return;
+      const g2Url = `https://www.g2.com/products/${slug}/reviews`;
+      const r = await fetch(g2Url, { headers, signal: AbortSignal.timeout(9000) });
+      if (!r.ok) return;
+      const html = await r.text();
+      extractLdReviews(html).slice(0, 6).forEach(body => addItem('G2', g2Url, body));
+    })(),
 
     // Reddit — real user discussion across the web
     (async () => {
@@ -304,7 +349,7 @@ Return ONLY valid JSON array:
 [
   {
     "ref": N,
-    "source": "App Store" | "Reddit" | "HackerNews" | "Web",
+    "source": "App Store" | "Reddit" | "HackerNews" | "Trustpilot" | "G2" | "Web",
     "persona": "Brief user type inferred from context (e.g. 'Developer', 'Small business owner', 'Student')",
     "quote": "Real or closely paraphrased first-person quote. 1–2 sentences.",
     "highlight": "the most revealing 3-6 word phrase verbatim from the quote",
@@ -316,9 +361,11 @@ CRITICAL: "ref" must be the exact integer from the [ref:N] tag of the snippet th
       }]);
 
     const text = message.content[0].text;
-    const match = text.match(/\[[\s\S]*\]/);
-    if (!match) return res.json({ cards: [] });
-    const parsed = JSON.parse(match[0]);
+    // Balanced-bracket scan: grab the FIRST complete top-level [ ... ] array,
+    // ignoring any prose the model adds after it (it sometimes writes [ref:N]
+    // in a trailing note, which broke a greedy regex).
+    const parsed = parseFirstJsonArray(text);
+    if (!parsed) return res.json({ cards: [] });
     // Map each ref back to its real, server-verified URL. Drop the sourceUrl if
     // the ref is missing/invalid so the client never renders a broken link.
     const cards = parsed.map(c => {
@@ -469,6 +516,32 @@ app.post('/api/prd', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Extract the first complete top-level JSON array, tolerating trailing prose,
+// markdown fences, and brackets appearing inside string values.
+function parseFirstJsonArray(text) {
+  const start = text.indexOf('[');
+  if (start === -1) return null;
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === '[') depth++;
+    else if (ch === ']') {
+      depth--;
+      if (depth === 0) {
+        try { return JSON.parse(text.slice(start, i + 1)); } catch { return null; }
+      }
+    }
+  }
+  return null;
+}
 
 function extractJSON(text) {
   // Try code fence first
