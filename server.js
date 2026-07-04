@@ -139,7 +139,17 @@ app.post('/api/real-perspectives', async (req, res) => {
   if (!productName) return res.status(400).json({ error: 'No product name provided' });
 
   const headers = { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' };
-  const sections = [];
+
+  // Each source item gets a stable server-side ref + real URL. The AI returns the
+  // ref (not the URL) so it can never fabricate/mangle a link. ref → url is mapped
+  // back here after extraction.
+  const items = [];
+  const urlByRef = new Map();
+  const addItem = (source, url, text) => {
+    const ref = items.length + 1;
+    urlByRef.set(ref, url);
+    items.push({ ref, source, url, text });
+  };
 
   // Web products live on the web — pull web voices (Reddit, HN, the site itself).
   // Only client apps get App Store reviews.
@@ -174,16 +184,15 @@ app.post('/api/real-perspectives', async (req, res) => {
       const reviewData = await reviewRes.json();
       const entries = reviewData?.feed?.entry ?? [];
       const appUrl = `https://apps.apple.com/us/app/id${appId}`;
-      const reviews = entries
+      entries
         .filter(e => e?.content?.label?.length > 30)
         .slice(0, 8)
-        .map(e => {
+        .forEach(e => {
           const title = e?.title?.label ?? '';
           const body = e?.content?.label ?? '';
           const rating = e?.['im:rating']?.label ?? '';
-          return `[App Store – URL:${appUrl} – ${rating}★ "${title}"]\n${body.slice(0, 400)}`;
+          addItem('App Store', appUrl, `${rating}★ "${title}" — ${body.slice(0, 400)}`);
         });
-      if (reviews.length) sections.push('=== App Store Reviews ===\n' + reviews.join('\n---\n'));
     })(),
 
     // 2. App Store (China) — same API, different storefront
@@ -203,15 +212,14 @@ app.post('/api/real-perspectives', async (req, res) => {
       const reviewData = await reviewRes.json();
       const entries = reviewData?.feed?.entry ?? [];
       const cnAppUrl = `https://apps.apple.com/cn/app/id${appId}`;
-      const reviews = entries
+      entries
         .filter(e => e?.content?.label?.length > 20)
         .slice(0, 6)
-        .map(e => {
+        .forEach(e => {
           const title = e?.title?.label ?? '';
           const body = e?.content?.label ?? '';
-          return `[中国 App Store – URL:${cnAppUrl} – "${title}"]\n${body.slice(0, 300)}`;
+          addItem('App Store', cnAppUrl, `"${title}" — ${body.slice(0, 300)}`);
         });
-      if (reviews.length) sections.push('=== 中国 App Store 评价 ===\n' + reviews.join('\n---\n'));
     })(),
   ];
 
@@ -232,12 +240,11 @@ app.post('/api/real-perspectives', async (req, res) => {
           return text.includes(productLower) && (p.selftext?.length > 60 || p.title?.length > 40);
         })
         .slice(0, 6)
-        .map(p => {
+        .forEach(p => {
           const url = `https://www.reddit.com${p.permalink}`;
           const body = (p.selftext || p.title || '').replace(/\s+/g, ' ').slice(0, 400);
-          return `[Reddit – r/${p.subreddit} – URL:${url}]\n${body}`;
+          addItem('Reddit', url, `r/${p.subreddit}: ${body}`);
         });
-      if (posts.length) sections.push('=== Reddit ===\n' + posts.join('\n---\n'));
     })(),
 
     // HackerNews — search comments mentioning the product
@@ -254,11 +261,11 @@ app.post('/api/real-perspectives', async (req, res) => {
           return text.includes(productLower) && text.length > 80;
         })
         .slice(0, 5)
-        .map(h => {
+        .forEach(h => {
+          // Algolia's objectID for a comment IS the HN item id; item?id=<it> is valid.
           const hnUrl = h.objectID ? `https://news.ycombinator.com/item?id=${h.objectID}` : 'https://news.ycombinator.com';
-          return `[HackerNews – URL:${hnUrl}]\n${h.comment_text.replace(/<[^>]+>/g, '').slice(0, 400)}`;
+          addItem('HackerNews', hnUrl, h.comment_text.replace(/<[^>]+>/g, '').slice(0, 400));
         });
-      if (comments.length) sections.push('=== HackerNews ===\n' + comments.join('\n---\n'));
     })(),
 
     // Product website — scrape for testimonials
@@ -266,18 +273,22 @@ app.post('/api/real-perspectives', async (req, res) => {
       const r = await fetch(webLink, { headers, signal: AbortSignal.timeout(10000) });
       const html = await r.text();
       const text = stripHtml(html).slice(0, 4000);
-      sections.push(`=== Product website – URL:${webLink} ===\n${text}`);
+      addItem('Web', webLink, text);
     })()] : []),
 
   ];
 
   await Promise.allSettled([...appStoreSources, ...webSources]);
 
-  if (!sections.length) {
+  if (!items.length) {
     return res.status(422).json({ error: 'Could not find any real user content for this product online.' });
   }
 
-  const rawContent = sections.join('\n\n').slice(0, 10000);
+  // Build the reference list the AI reads. It returns `ref`, never a URL.
+  const rawContent = items
+    .map(it => `[ref:${it.ref}] (${it.source})\n${it.text}`)
+    .join('\n\n')
+    .slice(0, 10000);
 
   try {
     const message = await claudeCreate('claude-haiku-4-5-20251001', 2000, [{
@@ -287,13 +298,13 @@ app.post('/api/real-perspectives', async (req, res) => {
 Sources collected:
 ${rawContent}
 
-Extract 5–8 genuine user quotes or closely paraphrased perspectives. Each must reflect an authentic user experience — not marketing copy or brand statements. Cover a mix of sentiments if present.
+Each source snippet is prefixed with [ref:N] and its (Source). Extract 5–8 genuine user quotes or closely paraphrased perspectives. Each must reflect an authentic user experience — not marketing copy or brand statements. Cover a mix of sentiments if present.
 
 Return ONLY valid JSON array:
 [
   {
+    "ref": N,
     "source": "App Store" | "Reddit" | "HackerNews" | "Web",
-    "sourceUrl": "the URL from the URL: label in the source section header",
     "persona": "Brief user type inferred from context (e.g. 'Developer', 'Small business owner', 'Student')",
     "quote": "Real or closely paraphrased first-person quote. 1–2 sentences.",
     "highlight": "the most revealing 3-6 word phrase verbatim from the quote",
@@ -301,13 +312,21 @@ Return ONLY valid JSON array:
   }
 ]
 
-If the content contains no real user voices (only marketing text), return [].`,
+CRITICAL: "ref" must be the exact integer from the [ref:N] tag of the snippet this quote came from. Never invent a ref. If the content contains no real user voices (only marketing text), return [].`,
       }]);
 
     const text = message.content[0].text;
     const match = text.match(/\[[\s\S]*\]/);
-    if (match) res.json({ cards: JSON.parse(match[0]) });
-    else res.json({ cards: [] });
+    if (!match) return res.json({ cards: [] });
+    const parsed = JSON.parse(match[0]);
+    // Map each ref back to its real, server-verified URL. Drop the sourceUrl if
+    // the ref is missing/invalid so the client never renders a broken link.
+    const cards = parsed.map(c => {
+      const { ref, ...rest } = c;
+      const sourceUrl = urlByRef.get(ref);
+      return sourceUrl ? { ...rest, sourceUrl } : rest;
+    });
+    res.json({ cards });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
