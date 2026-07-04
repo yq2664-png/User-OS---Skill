@@ -135,11 +135,15 @@ app.post('/api/simulate', upload.fields([{ name: 'screenshots', maxCount: 5 }, {
 
 // ── Real Perspectives ─────────────────────────────────────────────────────────
 app.post('/api/real-perspectives', async (req, res) => {
-  const { productName, webLink } = req.body;
+  const { productName, webLink, productStage } = req.body;
   if (!productName) return res.status(400).json({ error: 'No product name provided' });
 
   const headers = { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' };
   const sections = [];
+
+  // Web products live on the web — pull web voices (Reddit, HN, the site itself).
+  // Only client apps get App Store reviews.
+  const isWeb = productStage === 'web';
 
   function stripHtml(html) {
     return html
@@ -150,7 +154,7 @@ app.post('/api/real-perspectives', async (req, res) => {
       .trim();
   }
 
-  await Promise.allSettled([
+  const appStoreSources = isWeb ? [] : [
 
     // 1. App Store (US) — free public RSS, no auth needed
     (async () => {
@@ -209,8 +213,34 @@ app.post('/api/real-perspectives', async (req, res) => {
         });
       if (reviews.length) sections.push('=== 中国 App Store 评价 ===\n' + reviews.join('\n---\n'));
     })(),
+  ];
 
-    // 3. HackerNews — search stories mentioning the product
+  const webSources = [
+
+    // Reddit — real user discussion across the web
+    (async () => {
+      const r = await fetch(
+        `https://www.reddit.com/search.json?q=${encodeURIComponent(productName)}&sort=relevance&limit=25`,
+        { headers, signal: AbortSignal.timeout(8000) }
+      );
+      const data = await r.json();
+      const productLower = productName.toLowerCase();
+      const posts = (data?.data?.children ?? [])
+        .map(c => c.data)
+        .filter(p => {
+          const text = `${p.title ?? ''} ${p.selftext ?? ''}`.toLowerCase();
+          return text.includes(productLower) && (p.selftext?.length > 60 || p.title?.length > 40);
+        })
+        .slice(0, 6)
+        .map(p => {
+          const url = `https://www.reddit.com${p.permalink}`;
+          const body = (p.selftext || p.title || '').replace(/\s+/g, ' ').slice(0, 400);
+          return `[Reddit – r/${p.subreddit} – URL:${url}]\n${body}`;
+        });
+      if (posts.length) sections.push('=== Reddit ===\n' + posts.join('\n---\n'));
+    })(),
+
+    // HackerNews — search comments mentioning the product
     (async () => {
       const r = await fetch(
         `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(productName)}&tags=comment&hitsPerPage=20`,
@@ -231,7 +261,7 @@ app.post('/api/real-perspectives', async (req, res) => {
       if (comments.length) sections.push('=== HackerNews ===\n' + comments.join('\n---\n'));
     })(),
 
-    // 4. Product website — scrape for testimonials
+    // Product website — scrape for testimonials
     ...(webLink ? [(async () => {
       const r = await fetch(webLink, { headers, signal: AbortSignal.timeout(10000) });
       const html = await r.text();
@@ -239,7 +269,9 @@ app.post('/api/real-perspectives', async (req, res) => {
       sections.push(`=== Product website – URL:${webLink} ===\n${text}`);
     })()] : []),
 
-  ]);
+  ];
+
+  await Promise.allSettled([...appStoreSources, ...webSources]);
 
   if (!sections.length) {
     return res.status(422).json({ error: 'Could not find any real user content for this product online.' });
@@ -260,7 +292,7 @@ Extract 5–8 genuine user quotes or closely paraphrased perspectives. Each must
 Return ONLY valid JSON array:
 [
   {
-    "source": "App Store" | "HackerNews" | "Web",
+    "source": "App Store" | "Reddit" | "HackerNews" | "Web",
     "sourceUrl": "the URL from the URL: label in the source section header",
     "persona": "Brief user type inferred from context (e.g. 'Developer', 'Small business owner', 'Student')",
     "quote": "Real or closely paraphrased first-person quote. 1–2 sentences.",
@@ -315,16 +347,10 @@ app.post('/api/verify-product', async (req, res) => {
   try { domain = new URL(webLink).hostname; } catch {}
   const logo = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
 
-  // Fetch screenshot via Microlink (free tier)
-  let screenshot = '';
-  try {
-    const mlRes = await fetch(
-      `https://api.microlink.io/?url=${encodeURIComponent(webLink)}&screenshot=true&meta=false`,
-      { signal: AbortSignal.timeout(10000) }
-    );
-    const mlData = await mlRes.json();
-    screenshot = mlData?.data?.screenshot?.url ?? '';
-  } catch {}
+  // Screenshots via Microlink's free tier were unreliable — many sites block its
+  // headless browser and it captured error pages ("This page isn't working").
+  // Dropped in favour of the logo + extracted info, which are dependable.
+  const screenshot = '';
 
   let pageText = '';
   try {
