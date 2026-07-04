@@ -1,11 +1,9 @@
 import p_m01 from '../assets/personas/persona-male-01.png';
 import p_m02 from '../assets/personas/persona-male-02.png';
 import p_m03 from '../assets/personas/persona-male-03.png';
-import p_m04 from '../assets/personas/persona-male-04.png';
 import p_f01 from '../assets/personas/persona-female-01.png';
 import p_f02 from '../assets/personas/persona-female-02.png';
 import p_f03 from '../assets/personas/persona-female-03.png';
-import p_f04 from '../assets/personas/persona-female-04.png';
 
 export interface Persona {
   id: string;
@@ -90,20 +88,6 @@ export const PERSONAS: Persona[] = [
     ],
   },
   {
-    id: 'gamer',
-    image: p_m04,
-    name: 'Leo',
-    age: 24,
-    occupation: 'Gamer & Streamer',
-    city: 'Seoul',
-    personality: 'Efficiency-Oriented',
-    thoughts: [
-      "I'd use this to test game UX.",
-      "Needs dark mode.",
-      "This is actually clever.",
-    ],
-  },
-  {
     id: 'researcher',
     image: p_f03,
     name: 'Priya',
@@ -115,20 +99,6 @@ export const PERSONAS: Persona[] = [
       "Where's the methodology documentation?",
       "I'm curious about the AI model behind this.",
       "This could augment my research, not replace it.",
-    ],
-  },
-  {
-    id: 'executive',
-    image: p_f04,
-    name: 'Claire',
-    age: 45,
-    occupation: 'VP of Product',
-    city: 'New York',
-    personality: 'Decision Maker',
-    thoughts: [
-      "I need a shareable report for stakeholders.",
-      "How accurate is the AI simulation?",
-      "This could save weeks of research time.",
     ],
   },
 ];

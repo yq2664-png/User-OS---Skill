@@ -11,14 +11,12 @@ const CARD = 200;
 // Symmetric, shallow arc — keeps the outer cards from dipping too low so their
 // downward thought bubbles don't reach the description below.
 const LAYOUT = [
-  { offsetY: 20, rotation: -16, zIndex: 1 },
-  { offsetY: 9,  rotation: -11, zIndex: 2 },
-  { offsetY: 2,  rotation: -6,  zIndex: 3 },
-  { offsetY: 0,  rotation: -2,  zIndex: 5 },
-  { offsetY: 0,  rotation: 2,   zIndex: 5 },
-  { offsetY: 2,  rotation: 6,   zIndex: 3 },
-  { offsetY: 9,  rotation: 11,  zIndex: 2 },
-  { offsetY: 20, rotation: 16,  zIndex: 1 },
+  { offsetY: 18, rotation: -15, zIndex: 1 },
+  { offsetY: 6,  rotation: -9,  zIndex: 2 },
+  { offsetY: 0,  rotation: -3,  zIndex: 4 },
+  { offsetY: 0,  rotation: 3,   zIndex: 4 },
+  { offsetY: 6,  rotation: 9,   zIndex: 2 },
+  { offsetY: 18, rotation: 15,  zIndex: 1 },
 ];
 
 function FloatWrapper({ children }: { children: React.ReactNode }) {
