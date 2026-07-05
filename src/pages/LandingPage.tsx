@@ -53,7 +53,7 @@ export default function LandingPage({ onStart }: Props) {
 
       {/* ── How it works ──────────────────────────────────────── */}
       <section style={{ background: '#F5F5F7' }}>
-        <div className="page-container py-10 sm:py-12">
+        <div className="page-container pt-6 pb-10 sm:pt-7 sm:pb-12">
           <p className="section-title">How it works</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {STEPS.map((step) => (
@@ -73,7 +73,7 @@ export default function LandingPage({ onStart }: Props) {
       </section>
 
       {/* ── Features ──────────────────────────────────────────── */}
-      <section className="page-container py-10 sm:py-12">
+      <section className="page-container pt-6 pb-10 sm:pt-7 sm:pb-12">
         <p className="section-title">What you get</p>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {FEATURES.map((f) => (

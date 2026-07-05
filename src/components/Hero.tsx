@@ -45,7 +45,7 @@ export default function Hero({ onStart }: Props) {
 
       {/* Persona cluster — spans full content width, aligned with the nav.
           Extra top room so hover info bubbles don't reach the headline. */}
-      <div style={{ width: '100%', marginBottom: 48 }}>
+      <div style={{ width: 'calc(100% + 120px)', marginLeft: -60, marginRight: -60, marginBottom: 48 }}>
         <HeroPersonaCluster />
       </div>
 

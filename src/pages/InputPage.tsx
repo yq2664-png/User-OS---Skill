@@ -25,8 +25,8 @@ const STAGES: { id: ProductStage; label: string; desc: string }[] = [
   { id: 'client',     label: 'Client App',   desc: 'Desktop or mobile app'       },
 ];
 
-// Markdown skill file users can download from GitHub and install into their LLM.
-const SKILL_URL = 'https://raw.githubusercontent.com/yq2664-png/User-OS---Skill/main/SKILL.md';
+// GitHub repo where users can view and download the skill to install into their LLM.
+const SKILL_URL = 'https://github.com/yq2664-png/User-OS---Skill';
 
 interface VerifyResult {
   name: string;

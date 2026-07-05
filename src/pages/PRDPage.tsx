@@ -49,24 +49,18 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
           <span className="text-sm font-semibold truncate" style={{ color: '#1D1D1F' }}>
             {section.name || `Decision ${section.id}`}
           </span>
-          <div className="flex items-center gap-4 shrink-0">
-            {/* Impact / Confidence / Effort */}
-            {section.impact && (
-              <span className="text-[9px] tracking-widest uppercase hidden sm:block" style={{ color: '#6E6E73' }}>
-                Impact: {section.impact}
-              </span>
-            )}
-            {section.confidence != null && (
-              <span className="text-[9px] tracking-widest uppercase hidden sm:block" style={{ color: '#6E6E73' }}>
-                {section.confidence}% confidence
-              </span>
-            )}
-            {section.effort && (
-              <span className="text-[9px] tracking-widest uppercase hidden sm:block" style={{ color: '#6E6E73' }}>
-                Effort: {section.effort}
-              </span>
-            )}
-            <span className="text-[9px] tracking-widest uppercase" style={{ color }}>
+          <div className="flex items-center shrink-0">
+            {/* Impact / Confidence / Effort — fixed-width columns so they line up across rows */}
+            <span className="text-[9px] tracking-widest uppercase hidden sm:block text-left w-28" style={{ color: '#6E6E73' }}>
+              {section.impact ? `Impact: ${section.impact}` : ''}
+            </span>
+            <span className="text-[9px] tracking-widest uppercase hidden sm:block text-left w-28" style={{ color: '#6E6E73' }}>
+              {section.confidence != null ? `${section.confidence}% confidence` : ''}
+            </span>
+            <span className="text-[9px] tracking-widest uppercase hidden sm:block text-left w-24" style={{ color: '#6E6E73' }}>
+              {section.effort ? `Effort: ${section.effort}` : ''}
+            </span>
+            <span className="text-[9px] tracking-widest uppercase text-left w-16 ml-2" style={{ color }}>
               {section.priority}
             </span>
             <svg
@@ -81,29 +75,6 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
 
         {expanded && (
           <div style={{ borderTop: '1px solid #D2D2D7' }}>
-            {/* Strategy signals */}
-            {(section.impact || section.confidence != null || section.effort) && (
-              <div className="flex items-center gap-6 px-6 py-3" style={{ borderBottom: '1px solid #F5F5F7', background: '#F5F5F7' }}>
-                {section.impact && (
-                  <div>
-                    <p className="text-[9px] tracking-widest uppercase mb-0.5" style={{ color: '#D2D2D7' }}>Impact</p>
-                    <p className="text-xs font-medium" style={{ color: '#1D1D1F' }}>{section.impact}</p>
-                  </div>
-                )}
-                {section.confidence != null && (
-                  <div>
-                    <p className="text-[9px] tracking-widest uppercase mb-0.5" style={{ color: '#D2D2D7' }}>Confidence</p>
-                    <p className="text-xs font-medium" style={{ color: '#1D1D1F' }}>{section.confidence}%</p>
-                  </div>
-                )}
-                {section.effort && (
-                  <div>
-                    <p className="text-[9px] tracking-widest uppercase mb-0.5" style={{ color: '#D2D2D7' }}>Effort</p>
-                    <p className="text-xs font-medium" style={{ color: '#1D1D1F' }}>{section.effort}</p>
-                  </div>
-                )}
-              </div>
-            )}
             <div className="grid grid-cols-1 lg:grid-cols-4">
               {cells.map((cell, ci) => (
                 <div

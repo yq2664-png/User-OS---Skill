@@ -10,3 +10,11 @@ dist/
 
 # Local Claude Code settings (may contain tokens)
 .claude/settings.local.json
+
+# scratch / taste-skill artifacts
+.playwright-mcp/
+taste-*.jpeg
+apple.com.cn.*
+*-e1a6-*.png
+657e860a-*.png
+b3c45694-*.png

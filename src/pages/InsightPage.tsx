@@ -106,13 +106,13 @@ function InsightRow({
         <div className="space-y-2 mb-3">
           {item.observation && (
             <div className="flex gap-2">
-              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#D2D2D7' }}>Observed</span>
+              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#8E8E93' }}>Observed</span>
               <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.observation}</p>
             </div>
           )}
           {item.interpretation && (
             <div className="flex gap-2">
-              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#D2D2D7' }}>Why</span>
+              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#8E8E93' }}>Why</span>
               <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.interpretation}</p>
             </div>
           )}

@@ -493,7 +493,7 @@ app.post('/api/insights', async (req, res) => {
     return res.status(400).json({ error: 'No perspective cards provided' });
   }
   try {
-    const message = await claudeCreate('claude-opus-4-8', 6000, [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]);
+    const message = await claudeCreate('claude-haiku-4-5-20251001', 5000, [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]);
     const text = message.content[0].text;
     const parsed = extractJSON(text);
     if (parsed) res.json(parsed);
@@ -507,7 +507,7 @@ app.post('/api/insights', async (req, res) => {
 app.post('/api/prd', async (req, res) => {
   const { productName, insights } = req.body;
   try {
-    const message = await claudeCreate('claude-opus-4-8', 5000, [{ role: 'user', content: buildPRDPrompt(productName, insights) }]);
+    const message = await claudeCreate('claude-sonnet-4-6', 5000, [{ role: 'user', content: buildPRDPrompt(productName, insights) }]);
     const text = message.content[0].text;
     const parsed = extractJSON(text);
     if (parsed) res.json(parsed);

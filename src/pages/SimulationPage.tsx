@@ -65,35 +65,36 @@ function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onR
         "<HighlightedThought thought={card.thought} highlight={card.highlight} />"
       </p>
 
-      {/* Hover tooltip showing worry + assumption */}
+      {/* Hover tooltip. The wrapper spans up from the card top with pb-2 as a
+          transparent "bridge" (no dead gap), and it's a DOM child of the card,
+          so moving the mouse up into it keeps `hovered` true — the tooltip stays. */}
       {hovered && hasDetail && (
-        <div
-          className="absolute bottom-full left-0 mb-2 z-20 w-full p-5 pointer-events-none card-enter rounded-2xl"
-          style={{ background: '#1D1D1F', animationDelay: '0ms' }}
-        >
-          {/* Persona identity */}
-          <div className="mb-3 pb-3" style={{ borderBottom: '1px solid #3A3A3C' }}>
-            <p className="text-sm font-semibold text-white">{name}, {age}</p>
-            <p className="text-xs mt-0.5" style={{ color: '#8A8F98' }}>{occupation}</p>
+        <div className="absolute bottom-full left-0 w-full pb-2 z-20 card-enter" style={{ animationDelay: '0ms' }}>
+          <div className="w-full p-5 rounded-2xl" style={{ background: '#1D1D1F' }}>
+            {/* Persona identity */}
+            <div className="mb-3 pb-3" style={{ borderBottom: '1px solid #3A3A3C' }}>
+              <p className="text-sm font-semibold text-white">{name}, {age}</p>
+              <p className="text-xs mt-0.5" style={{ color: '#8A8F98' }}>{occupation}</p>
+            </div>
+            {card.driver && (
+              <div className="mb-3">
+                <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Goal</p>
+                <p className="text-xs leading-relaxed text-white">{card.driver}</p>
+              </div>
+            )}
+            {card.worry && (
+              <div className="mb-3">
+                <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Worry</p>
+                <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.worry}</p>
+              </div>
+            )}
+            {card.assumption && (
+              <div>
+                <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Assumption</p>
+                <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.assumption}</p>
+              </div>
+            )}
           </div>
-          {card.driver && (
-            <div className="mb-3">
-              <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Goal</p>
-              <p className="text-xs leading-relaxed text-white">{card.driver}</p>
-            </div>
-          )}
-          {card.worry && (
-            <div className="mb-3">
-              <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Worry</p>
-              <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.worry}</p>
-            </div>
-          )}
-          {card.assumption && (
-            <div>
-              <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Assumption</p>
-              <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.assumption}</p>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -150,6 +151,8 @@ interface Props {
   formData: FormData;
   cards: Card[];
   setCards: (c: Card[]) => void;
+  realCards: RealCard[];
+  setRealCards: (c: RealCard[] | ((prev: RealCard[]) => RealCard[])) => void;
   onNext: () => void;
 }
 
@@ -160,14 +163,13 @@ const SIM_STEPS = [
   'Simulating reactions',
 ];
 
-export default function SimulationPage({ formData, cards, setCards, onNext }: Props) {
+export default function SimulationPage({ formData, cards, setCards, realCards, setRealCards, onNext }: Props) {
   const [streaming, setStreaming] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [done, setDone] = useState(cards.length > 0);
   const [error, setError] = useState('');
   const [simStep, setSimStep] = useState(0);
 
-  const [realCards, setRealCards] = useState<RealCard[]>([]);
   const [realLoading, setRealLoading] = useState(false);
   const [realError, setRealError] = useState('');
 
@@ -313,6 +315,25 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
   };
 
   const removeRealCard = (i: number) => setRealCards(prev => prev.filter((_, idx) => idx !== i));
+
+  // User-contributed perspectives — things they've actually heard/observed.
+  const [manualLabel, setManualLabel] = useState('');
+  const [manualThought, setManualThought] = useState('');
+  const addManualCard = () => {
+    if (!manualThought.trim()) return;
+    const card: Card = {
+      perspective: manualLabel.trim() || 'Observed by you',
+      driver: '',
+      thought: manualThought.trim(),
+      name: 'You',
+      occupation: 'Collected in the field',
+    };
+    const updated = [...cardsRef.current, card];
+    cardsRef.current = updated;
+    setCards(updated);
+    setManualLabel('');
+    setManualThought('');
+  };
 
   const isLoading = streaming || loadingMore;
 
@@ -503,6 +524,47 @@ export default function SimulationPage({ formData, cards, setCards, onNext }: Pr
               Generate more perspectives
             </button>
           )}
+
+          {/* Add your own — perspectives the user actually heard or observed */}
+          <div className="mt-6 p-6 rounded-2xl" style={{ background: '#1D1D1F' }}>
+            <p className="text-sm font-semibold mb-1 text-white">Add your own perspective</p>
+            <p className="text-xs mb-4" style={{ color: '#8A8F98' }}>
+              Heard something real from a user, a review, or an interview? Add it — it’s analyzed alongside the simulated ones.
+            </p>
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                value={manualLabel}
+                onChange={e => setManualLabel(e.target.value)}
+                placeholder="Perspective type (optional) — e.g. Power user, Skeptic"
+                className="w-full rounded-xl px-4 py-2.5 outline-none placeholder:text-[#62666D]"
+                style={{ fontSize: '14px', background: '#2A2C2F', border: '1px solid #3A3A3C', color: 'white' }}
+              />
+              <textarea
+                value={manualThought}
+                onChange={e => setManualThought(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addManualCard(); }}
+                rows={2}
+                placeholder="What did they actually say or do? (first-person works best)"
+                className="w-full rounded-xl px-4 py-2.5 outline-none resize-none placeholder:text-[#62666D]"
+                style={{ fontSize: '14px', background: '#2A2C2F', border: '1px solid #3A3A3C', color: 'white' }}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={addManualCard}
+                  disabled={!manualThought.trim()}
+                  className={`text-xs font-medium inline-flex items-center gap-1.5 rounded-full px-4 py-2 transition-opacity ${!manualThought.trim() ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  style={{ background: 'white', color: '#1D1D1F' }}
+                >
+                  Add perspective
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {cards.length > 0 && (
             <div className="mt-10 pt-8 flex items-center justify-between" style={{ borderTop: '1px solid #D2D2D7' }}>
               <p className="text-sm" style={{ color: '#6E6E73' }}>

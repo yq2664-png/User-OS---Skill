@@ -108,6 +108,7 @@ export default function App() {
     documents: [],
   });
   const [cards, setCards] = useState<Card[]>([]);
+  const [realCards, setRealCards] = useState<RealCard[]>([]);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [prdData, setPrdData] = useState<PRDData | null>(null);
 
@@ -242,7 +243,7 @@ export default function App() {
           <InputPage
             formData={formData}
             setFormData={setFormData}
-            onSubmit={() => { setCards([]); setInsights(null); setPrdData(null); navigate('simulation'); }}
+            onSubmit={() => { setCards([]); setRealCards([]); setInsights(null); setPrdData(null); navigate('simulation'); }}
           />
         )}
         {page === 'simulation' && (
@@ -250,6 +251,8 @@ export default function App() {
             formData={formData}
             cards={cards}
             setCards={setCards}
+            realCards={realCards}
+            setRealCards={setRealCards}
             onNext={() => navigate('insights')}
           />
         )}
@@ -269,7 +272,7 @@ export default function App() {
             prdData={prdData}
             setPrdData={setPrdData}
             onGoLanding={() => navigate('landing')}
-            onNewProduct={() => { setCards([]); setInsights(null); setPrdData(null); navigate('input'); }}
+            onNewProduct={() => { setCards([]); setRealCards([]); setInsights(null); setPrdData(null); navigate('input'); }}
           />
         )}
       </div>

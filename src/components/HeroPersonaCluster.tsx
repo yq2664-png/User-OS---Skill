@@ -3,7 +3,7 @@ import { motion, useAnimationFrame, useMotionValue, useTransform } from 'framer-
 import { PERSONAS } from '../data/personas';
 import PersonaCard from './PersonaCard';
 
-const CARD = 200;
+const CARD = 224;
 
 // Shallow, wide fan. offsetX is computed as a percentage so the cluster
 // fills its parent width (aligned with the nav content edges).
@@ -62,7 +62,7 @@ export default function HeroPersonaCluster() {
   const n = PERSONAS.length;
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: 226 }}>
+    <div style={{ position: 'relative', width: '100%', height: 248 }}>
       <FloatWrapper>
         {PERSONAS.map((persona, i) => {
           const layout = LAYOUT[i];
