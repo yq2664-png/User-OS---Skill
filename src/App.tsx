@@ -42,6 +42,7 @@ export interface Card {
   name?: string;         // humanised persona name e.g. "Marcus"
   age?: number;          // persona age
   occupation?: string;   // persona occupation
+  manual?: boolean;      // added by the user, not AI-simulated
 }
 
 export interface RealCard {
@@ -93,20 +94,22 @@ export interface PRDData {
   sections: PRDSection[];
 }
 
+const BLANK_FORM: FormData = {
+  productName: '',
+  productStage: '',
+  productType: '',
+  coreFunctions: '',
+  webLink: '',
+  requirements: '',
+  featureConstraints: [],
+  timeConstraints: [],
+  screenshots: [],
+  documents: [],
+};
+
 export default function App() {
   const [page, setPage] = useState<Page>('landing');
-  const [formData, setFormData] = useState<FormData>({
-    productName: '',
-    productStage: '',
-    productType: '',
-    coreFunctions: '',
-    webLink: '',
-    requirements: '',
-    featureConstraints: [],
-    timeConstraints: [],
-    screenshots: [],
-    documents: [],
-  });
+  const [formData, setFormData] = useState<FormData>({ ...BLANK_FORM });
   const [cards, setCards] = useState<Card[]>([]);
   const [realCards, setRealCards] = useState<RealCard[]>([]);
   const [insights, setInsights] = useState<Insights | null>(null);
@@ -272,7 +275,7 @@ export default function App() {
             prdData={prdData}
             setPrdData={setPrdData}
             onGoLanding={() => navigate('landing')}
-            onNewProduct={() => { setCards([]); setRealCards([]); setInsights(null); setPrdData(null); navigate('input'); }}
+            onNewProduct={() => { setFormData({ ...BLANK_FORM }); setCards([]); setRealCards([]); setInsights(null); setPrdData(null); navigate('input'); }}
           />
         )}
       </div>

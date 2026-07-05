@@ -316,7 +316,8 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
 
   const removeRealCard = (i: number) => setRealCards(prev => prev.filter((_, idx) => idx !== i));
 
-  // User-contributed perspectives — things they've actually heard/observed.
+  // User-contributed perspectives — things they've actually heard/observed. Optional.
+  const [showManual, setShowManual] = useState(false);
   const [manualLabel, setManualLabel] = useState('');
   const [manualThought, setManualThought] = useState('');
   const addManualCard = () => {
@@ -327,6 +328,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
       thought: manualThought.trim(),
       name: 'You',
       occupation: 'Collected in the field',
+      manual: true,
     };
     const updated = [...cardsRef.current, card];
     cardsRef.current = updated;
@@ -479,12 +481,12 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
         </div>
       )}
 
-      {(cards.length > 0 || streaming) && (
+      {(cards.some(c => !c.manual) || streaming) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {cards.map((card, i) => (
-            <PersonaCard key={`${card.persona}-${i}`} card={card} index={i} onRemove={() => removeCard(i)} />
+          {cards.map((card, i) => !card.manual && (
+            <PersonaCard key={`sim-${i}`} card={card} index={i} onRemove={() => removeCard(i)} />
           ))}
-          {streaming && Array.from({ length: Math.max(0, 8 - cards.length) }).map((_, i) => (
+          {streaming && Array.from({ length: Math.max(0, 8 - cards.filter(c => !c.manual).length) }).map((_, i) => (
             <div key={`ph-${i}`} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
               <div className="flex items-center justify-between mb-5">
                 <div className="loading-bar h-2 w-24 rounded" />
@@ -511,24 +513,57 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
         </div>
       )}
 
+      {/* Generate more — belongs with the simulated set */}
+      {done && !loadingMore && cards.some(c => !c.manual) && (
+        <button
+          onClick={() => runSimulation(true)}
+          className="mt-3 w-full py-5 text-sm flex items-center justify-center gap-2 rounded-2xl transition-colors duration-150"
+          style={{ border: '1.5px dashed #D2D2D7', color: '#6E6E73' }}
+        >
+          <span className="text-lg leading-none">+</span>
+          Generate more perspectives
+        </button>
+      )}
+
+      {/* Your Perspectives — user-added, kept in their own section */}
+      {done && cards.some(c => c.manual) && (
+        <div className="mt-12">
+          <div className="flex items-baseline gap-4 mb-3">
+            <h2 className="text-2xl font-semibold" style={{ color: '#1D1D1F' }}>Your Perspectives</h2>
+            <span className="text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>Added by you</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {cards.map((card, i) => card.manual && (
+              <PersonaCard key={`you-${i}`} card={card} index={i} onRemove={() => removeCard(i)} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Footer actions */}
       {done && (
         <div className="mt-12">
-          {!loadingMore && (
-            <button
-              onClick={() => runSimulation(true)}
-              className="w-full py-5 text-sm flex items-center justify-center gap-2 rounded-2xl transition-colors duration-150"
-              style={{ border: '1.5px dashed #D2D2D7', color: '#6E6E73' }}
-            >
-              <span className="text-lg leading-none">+</span>
-              Generate more perspectives
-            </button>
-          )}
-
-          {/* Add your own — perspectives the user actually heard or observed */}
-          <div className="mt-6 p-6 rounded-2xl" style={{ background: '#1D1D1F' }}>
-            <p className="text-sm font-semibold mb-1 text-white">Add your own perspective</p>
-            <p className="text-xs mb-4" style={{ color: '#8A8F98' }}>
+          {/* Add your own — optional; collapsed until the user opts in */}
+          <div className="mt-8">
+            {!showManual ? (
+              <button
+                onClick={() => setShowManual(true)}
+                className="text-xs font-medium inline-flex items-center gap-1 transition-opacity"
+                style={{ background: 'none', border: 'none', padding: 0, color: '#0071E3' }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Add your own perspective
+                <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span>
+              </button>
+            ) : (
+            <>
+            <p className="text-sm font-semibold mb-1" style={{ color: '#1D1D1F' }}>
+              Add your own perspective
+              <span className="ml-1.5 text-xs normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span>
+            </p>
+            <p className="text-xs mb-4" style={{ color: '#6E6E73' }}>
               Heard something real from a user, a review, or an interview? Add it — it’s analyzed alongside the simulated ones.
             </p>
             <div className="flex flex-col gap-2">
@@ -537,8 +572,8 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 value={manualLabel}
                 onChange={e => setManualLabel(e.target.value)}
                 placeholder="Perspective type (optional) — e.g. Power user, Skeptic"
-                className="w-full rounded-xl px-4 py-2.5 outline-none placeholder:text-[#62666D]"
-                style={{ fontSize: '14px', background: '#2A2C2F', border: '1px solid #3A3A3C', color: 'white' }}
+                className="w-full rounded-xl px-4 py-2.5 outline-none"
+                style={{ fontSize: '14px', background: '#F5F5F7', border: 'none', color: '#1D1D1F' }}
               />
               <textarea
                 value={manualThought}
@@ -546,15 +581,15 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addManualCard(); }}
                 rows={2}
                 placeholder="What did they actually say or do? (first-person works best)"
-                className="w-full rounded-xl px-4 py-2.5 outline-none resize-none placeholder:text-[#62666D]"
-                style={{ fontSize: '14px', background: '#2A2C2F', border: '1px solid #3A3A3C', color: 'white' }}
+                className="w-full rounded-xl px-4 py-2.5 outline-none resize-none"
+                style={{ fontSize: '14px', background: '#F5F5F7', border: 'none', color: '#1D1D1F' }}
               />
               <div className="flex justify-end">
                 <button
                   onClick={addManualCard}
                   disabled={!manualThought.trim()}
-                  className={`text-xs font-medium inline-flex items-center gap-1.5 rounded-full px-4 py-2 transition-opacity ${!manualThought.trim() ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  style={{ background: 'white', color: '#1D1D1F' }}
+                  className={`text-xs font-medium inline-flex items-center gap-1 transition-opacity ${!manualThought.trim() ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  style={{ background: 'none', border: 'none', padding: 0, color: '#0071E3' }}
                 >
                   Add perspective
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -563,6 +598,8 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 </button>
               </div>
             </div>
+            </>
+            )}
           </div>
 
           {cards.length > 0 && (
