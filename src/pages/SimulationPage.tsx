@@ -473,8 +473,8 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
         </div>
       )}
 
-      {/* Simulated Perspectives section title */}
-      {showReal && done && (cards.length > 0 || loadingMore) && (
+      {/* Simulated Perspectives section title — show as soon as generation starts */}
+      {showReal && (streaming || loadingMore || cards.some(c => !c.manual)) && (
         <div className="flex items-baseline gap-4 mb-3 card-enter" style={{ animationDelay: '0ms' }}>
           <h2 className="text-2xl font-semibold" style={{ color: '#1D1D1F' }}>Simulated Perspectives</h2>
           <span className="text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>Behavioral simulation</span>
@@ -548,10 +548,10 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
             {!showManual ? (
               <button
                 onClick={() => setShowManual(true)}
-                className="text-xs font-medium inline-flex items-center gap-1 transition-opacity"
+                className="text-sm font-medium w-full flex items-center justify-end gap-1.5 transition-opacity"
                 style={{ background: 'none', border: 'none', padding: 0, color: '#0071E3' }}
               >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
                   <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 Add your own perspective

@@ -65,6 +65,8 @@ function InsightRow({
   const impact: ImpactLevel = item.impact ?? 'Medium';
 
   const color = IMPACT_COLOR[impact];
+  const [detailOpen, setDetailOpen] = useState(false);
+  const hasDetail = !!(item.observation || item.interpretation);
 
   return (
     <div
@@ -102,21 +104,41 @@ function InsightRow({
           </p>
         )}
 
-        {/* Observation → Interpretation */}
-        <div className="space-y-2 mb-3">
-          {item.observation && (
-            <div className="flex gap-2">
-              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#8E8E93' }}>Observed</span>
-              <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.observation}</p>
-            </div>
-          )}
-          {item.interpretation && (
-            <div className="flex gap-2">
-              <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#8E8E93' }}>Why</span>
-              <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.interpretation}</p>
-            </div>
-          )}
-        </div>
+        {/* Observation → Interpretation — collapsible */}
+        {hasDetail && (
+          <>
+            <button
+              onClick={() => setDetailOpen(o => !o)}
+              className="flex items-center gap-1 mb-2 transition-opacity"
+              style={{ background: 'none', border: 'none', padding: 0, color: '#8E8E93' }}
+            >
+              <svg
+                width="10" height="10" viewBox="0 0 12 12" fill="none"
+                className={`transition-transform duration-200 ${detailOpen ? 'rotate-90' : ''}`}
+                style={{ color: '#8E8E93' }}
+              >
+                <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="text-[9px] tracking-widest uppercase">{detailOpen ? 'Hide detail' : 'Observed · Why'}</span>
+            </button>
+            {detailOpen && (
+              <div className="space-y-2 mb-3">
+                {item.observation && (
+                  <div className="flex gap-2">
+                    <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#8E8E93' }}>Observed</span>
+                    <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.observation}</p>
+                  </div>
+                )}
+                {item.interpretation && (
+                  <div className="flex gap-2">
+                    <span className="text-[9px] tracking-widest uppercase shrink-0 mt-0.5 w-20" style={{ color: '#8E8E93' }}>Why</span>
+                    <p className="text-xs leading-relaxed" style={{ color: '#6E6E73' }}>{item.interpretation}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
 
         {false && item.valueNote && (
           <p className="text-xs leading-relaxed pl-2" style={{ color: '#6E6E73', borderLeft: '2px solid #D2D2D7' }}>

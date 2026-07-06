@@ -10,7 +10,7 @@ export default function PersonaThoughtBubble({ thought }: Props) {
     // `transform` on the inner element, so centering must live out here.
     <div style={{
       position: 'absolute',
-      top: 'calc(100% + 12px)',
+      top: 'calc(100% - 34px)',
       left: '50%',
       transform: 'translateX(-50%)',
       width: 192,
