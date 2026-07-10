@@ -72,7 +72,7 @@ function InsightRow({
   return (
     <div
       className={`card-enter py-5 flex gap-0 transition-opacity duration-150 ${selected ? 'opacity-100' : 'opacity-40'}`}
-      style={{ animationDelay: `${animDelay}ms`, borderBottom: '1px solid #F7F5EF' }}
+      style={{ animationDelay: `${animDelay}ms`, borderBottom: '1px solid #FBFAF6' }}
     >
       {/* Priority color bar */}
       <div className="w-[3px] shrink-0 mr-5 rounded-full self-stretch" style={{ background: color }} />
@@ -173,7 +173,7 @@ function ImpactGroup({
       <div className="flex items-center gap-2 py-2 mb-1">
         <Stars level={level} />
         <span className="text-[9px] tracking-[0.2em] uppercase" style={{ color: '#6E6E73' }}>{level}</span>
-        <div className="flex-1 h-px" style={{ background: '#F7F5EF' }} />
+        <div className="flex-1 h-px" style={{ background: '#FBFAF6' }} />
         <span className="text-[9px]" style={{ color: '#D2D2D7' }}>{items.length}</span>
       </div>
       {items.map((item, i) => (
@@ -412,7 +412,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
 
       {/* Error */}
       {error && (
-        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F7F5EF' }}>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#FBFAF6' }}>
           <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
           <button onClick={() => { startedRef.current = false; fetchInsights(); }} className="btn-primary text-xs">Retry</button>
         </div>
@@ -425,7 +425,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
             <div key={s.key}>
               <div className="loading-bar h-3 w-40 rounded mb-6" />
               {[1, 2, 3].map(i => (
-                <div key={i} className="py-5 flex gap-5" style={{ borderBottom: '1px solid #F7F5EF' }}>
+                <div key={i} className="py-5 flex gap-5" style={{ borderBottom: '1px solid #FBFAF6' }}>
                   <div className="shrink-0 w-16 space-y-2">
                     <div className="loading-bar h-5 w-12 rounded" />
                     <div className="loading-bar h-px w-full" />

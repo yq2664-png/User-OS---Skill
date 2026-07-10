@@ -4,7 +4,7 @@ import { verifyProduct } from './api';
 
 function FormRow({ label, hint, children }: { label: string; hint: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 lg:gap-16 py-10" style={{ borderBottom: '1px solid #F7F5EF' }}>
+    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 lg:gap-16 py-10" style={{ borderBottom: '1px solid #FBFAF6' }}>
       <div className="pt-1">
         <p className="label-tag mb-2">{label}</p>
         <p className="text-sm leading-relaxed" style={{ color: '#6E6E73' }}>{hint}</p>
@@ -151,7 +151,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                   className="text-left stage-card-enter"
                   style={{
                     animationDelay: `${i * 80}ms`,
-                    background: selected ? '#26221D' : '#F7F5EF',
+                    background: selected ? '#26221D' : '#FBFAF6',
                     borderRadius: '20px',
                     padding: '24px 20px',
                     transition: 'background 0.24s cubic-bezier(0.4,0,0.6,1)',
@@ -188,7 +188,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                   onClick={() => selectStage(s.id)}
                   className="text-base font-semibold px-7 py-3 rounded-full transition-all"
                   style={{
-                    background: selected ? '#26221D' : '#F7F5EF',
+                    background: selected ? '#26221D' : '#FBFAF6',
                     color: selected ? 'white' : '#6E6E73',
                     transition: 'background 0.24s cubic-bezier(0.4,0,0.6,1), color 0.24s cubic-bezier(0.4,0,0.6,1)',
                   }}
@@ -208,7 +208,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                 <input
                   type="text"
                   className="w-full text-[#1D1D1F] outline-none rounded-xl px-4 py-3"
-                  style={{ fontSize: '17px', lineHeight: '1.5', background: '#F7F5EF', border: 'none' }}
+                  style={{ fontSize: '17px', lineHeight: '1.5', background: '#FBFAF6', border: 'none' }}
                   placeholder="e.g. Notion, Linear, Figma"
                   value={formData.productName}
                   onChange={e => update('productName', e.target.value)}
@@ -223,7 +223,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                 <input
                   type="url"
                   className="w-full text-[#1D1D1F] outline-none rounded-xl px-4 py-3"
-                  style={{ fontSize: '17px', lineHeight: '1.5', background: '#F7F5EF', border: 'none' }}
+                  style={{ fontSize: '17px', lineHeight: '1.5', background: '#FBFAF6', border: 'none' }}
                   placeholder="https://yourproduct.com"
                   value={formData.webLink}
                   onChange={e => { update('webLink', e.target.value); setVerifyStatus('idle'); }}
@@ -239,7 +239,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                   type="button"
                   onClick={() => docRef.current?.click()}
                   className="w-full py-5 text-center rounded-xl transition-colors"
-                  style={{ background: '#F7F5EF', border: 'none' }}
+                  style={{ background: '#FBFAF6', border: 'none' }}
                 >
                   <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="mx-auto mb-1" style={{ color: '#D2D2D7' }}>
                     <path d="M10 3v10M6 7l4-4 4 4M3 14v1a2 2 0 002 2h10a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -252,9 +252,9 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                     setFormData({ ...formData, documents: [...formData.documents, ...Array.from(e.target.files)] });
                   }} />
                 {formData.documents.length > 0 && (
-                  <div className="mt-2 rounded-xl overflow-hidden" style={{ background: '#F7F5EF' }}>
+                  <div className="mt-2 rounded-xl overflow-hidden" style={{ background: '#FBFAF6' }}>
                     {formData.documents.map((f, i) => (
-                      <div key={i} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i < formData.documents.length - 1 ? '1px solid #EDE9E0' : 'none' }}>
+                      <div key={i} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i < formData.documents.length - 1 ? '1px solid #F2EFE9' : 'none' }}>
                         <span className="text-sm truncate" style={{ color: '#6E6E73' }}>{f.name}</span>
                         <button type="button" className="ml-4 text-xs shrink-0" style={{ color: '#D2D2D7' }}
                           onClick={() => setFormData({ ...formData, documents: formData.documents.filter((_, j) => j !== i) })}>
@@ -292,7 +292,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
               </label>
               <textarea
                 className="w-full text-[#1D1D1F] outline-none rounded-xl px-4 py-3 resize-none"
-                style={{ fontSize: '17px', lineHeight: '1.6', background: '#F7F5EF', border: 'none' }}
+                style={{ fontSize: '17px', lineHeight: '1.6', background: '#FBFAF6', border: 'none' }}
                 rows={4}
                 placeholder={
                   stage === 'web'
@@ -314,7 +314,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
             {stage === 'unpublished' && (
               <>
                 {showUnpubChoiceHint && (
-                  <div className="flex items-start gap-2.5 mb-4 p-4 rounded-xl" style={{ background: '#F7F5EF' }}>
+                  <div className="flex items-start gap-2.5 mb-4 p-4 rounded-xl" style={{ background: '#FBFAF6' }}>
                     <span className="mt-0.5 shrink-0" style={{ color: '#127A74' }}>
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                         <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
@@ -368,7 +368,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
 
                 {verifyStatus === 'error' && (
                   <div className="space-y-4">
-                    <div className="p-5 rounded-xl" style={{ background: '#F7F5EF' }}>
+                    <div className="p-5 rounded-xl" style={{ background: '#FBFAF6' }}>
                       <p className="text-sm mb-1" style={{ color: '#6E6E73' }}>Couldn't find this product.</p>
                       <p className="text-xs" style={{ color: '#6E6E73' }}>{verifyError}</p>
                     </div>
@@ -386,7 +386,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                           key={i}
                           onClick={() => selectApp(app)}
                           className="w-full text-left flex items-center gap-4 p-4 rounded-xl transition-colors"
-                          style={{ background: '#F7F5EF' }}
+                          style={{ background: '#FBFAF6' }}
                         >
                           {app.logo && <img src={app.logo} alt="" className="w-10 h-10 rounded-xl shrink-0" />}
                           <div>
@@ -404,7 +404,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
 
                 {verifyStatus === 'done' && verifyResult && (
                   <div className="space-y-6">
-                    <div className="rounded-2xl overflow-hidden" style={{ background: '#F7F5EF' }}>
+                    <div className="rounded-2xl overflow-hidden" style={{ background: '#FBFAF6' }}>
                       <div className="flex items-center gap-4 p-5" style={{ borderBottom: '1px solid #D2D2D7' }}>
                         {verifyResult.logo && (
                           <img src={verifyResult.logo} alt="" className="w-10 h-10 rounded-xl shrink-0" />

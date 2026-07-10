@@ -174,6 +174,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
 
   const [realLoading, setRealLoading] = useState(false);
   const [realError, setRealError] = useState('');
+  const [realAttempted, setRealAttempted] = useState(false);
 
   const bufferRef = useRef('');
   const cardsRef = useRef<Card[]>(cards);
@@ -209,6 +210,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
       setRealError(e.message || 'Could not load real perspectives.');
     } finally {
       setRealLoading(false);
+      setRealAttempted(true);
     }
   }
 
@@ -364,14 +366,14 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
 
       {/* Error */}
       {error && (
-        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F7F5EF' }}>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#FBFAF6' }}>
           <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
           <button onClick={() => { startedRef.current = false; runSimulation(); }} className="btn-primary text-xs">Retry</button>
         </div>
       )}
 
       {/* Real User Voices */}
-      {showReal && (realLoading || realCards.length > 0 || realError) && (
+      {showReal && (realLoading || realCards.length > 0 || realError || realAttempted) && (
         <div className="mb-20">
           <div className="flex items-baseline gap-4 mb-3">
             <h2 className="text-2xl font-semibold" style={{ color: '#1D1D1F' }}>Real User Voices</h2>
@@ -384,7 +386,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
           {realLoading && realCards.length === 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
+                <div key={i} className="p-8 rounded-2xl" style={{ background: '#FBFAF6' }}>
                   <div className="flex justify-between mb-4">
                     <div className="loading-bar h-2 w-20 rounded" />
                     <div className="loading-bar h-2 w-14 rounded" />
@@ -399,7 +401,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
           )}
 
           {realError && (
-            <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ background: '#F7F5EF' }}>
+            <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ background: '#FBFAF6' }}>
               <span className="mt-0.5 shrink-0" style={{ color: '#D2D2D7' }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
@@ -418,7 +420,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 <RealCardItem key={i} card={card} index={i} onRemove={() => removeRealCard(i)} />
               ))}
               {realLoading && [1, 2].map(i => (
-                <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
+                <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#FBFAF6' }}>
                   <div className="flex justify-between mb-4">
                     <div className="loading-bar h-2 w-20 rounded" />
                     <div className="loading-bar h-2 w-14 rounded" />
@@ -433,7 +435,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
           )}
 
           {!realLoading && !realError && realCards.length === 0 && (
-            <p className="text-sm p-6 rounded-2xl" style={{ color: '#6E6E73', background: '#F7F5EF' }}>
+            <p className="text-sm p-6 rounded-2xl" style={{ color: '#6E6E73', background: '#FBFAF6' }}>
               No real user reviews found online for this product.
             </p>
           )}
@@ -465,7 +467,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
             <PersonaCard key={`sim-${i}`} card={card} index={i} onRemove={() => removeCard(i)} />
           ))}
           {streaming && Array.from({ length: Math.max(0, 8 - cards.filter(c => !c.manual).length) }).map((_, i) => (
-            <div key={`ph-${i}`} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
+            <div key={`ph-${i}`} className="p-8 rounded-2xl" style={{ background: '#FBFAF6' }}>
               <div className="flex items-center justify-between mb-5">
                 <div className="loading-bar h-2 w-24 rounded" />
                 <div className="loading-bar h-2 w-16 rounded" />
@@ -477,7 +479,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
             </div>
           ))}
           {loadingMore && Array.from({ length: 4 }).map((_, i) => (
-            <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
+            <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#FBFAF6' }}>
               <div className="flex items-center justify-between mb-5">
                 <div className="loading-bar h-2 w-24 rounded" />
                 <div className="loading-bar h-2 w-16 rounded" />
@@ -551,7 +553,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 onChange={e => setManualLabel(e.target.value)}
                 placeholder="Perspective type (optional) — e.g. Power user, Skeptic"
                 className="w-full rounded-xl px-4 py-2.5 outline-none"
-                style={{ fontSize: '14px', background: '#F7F5EF', border: 'none', color: '#1D1D1F' }}
+                style={{ fontSize: '14px', background: '#FBFAF6', border: 'none', color: '#1D1D1F' }}
               />
               <textarea
                 value={manualThought}
@@ -560,7 +562,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 rows={2}
                 placeholder="What did they actually say or do? (first-person works best)"
                 className="w-full rounded-xl px-4 py-2.5 outline-none resize-none"
-                style={{ fontSize: '14px', background: '#F7F5EF', border: 'none', color: '#1D1D1F' }}
+                style={{ fontSize: '14px', background: '#FBFAF6', border: 'none', color: '#1D1D1F' }}
               />
               <div className="flex justify-end">
                 <button

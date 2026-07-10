@@ -38,7 +38,7 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
   return (
     <div
       className="card-enter flex"
-      style={{ animationDelay: `${index * 80}ms`, borderBottom: '1px solid #F7F5EF' }}
+      style={{ animationDelay: `${index * 80}ms`, borderBottom: '1px solid #FBFAF6' }}
     >
       <div className="w-[3px] shrink-0" style={{ background: color }} />
 
@@ -46,7 +46,7 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
         <button
           onClick={() => setExpanded(e => !e)}
           className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left transition-colors"
-          style={{ background: expanded ? '#F7F5EF' : 'white' }}
+          style={{ background: expanded ? '#EFE9DF' : 'white' }}
         >
           <span className="text-sm font-semibold truncate" style={{ color: '#1D1D1F' }}>
             {section.name || `Decision ${section.id}`}
@@ -76,7 +76,7 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
         </button>
 
         {expanded && (
-          <div style={{ borderTop: '1px solid #D2D2D7' }}>
+          <div style={{ borderTop: '1px solid #D2D2D7', background: 'white' }}>
             <div className="grid grid-cols-1 lg:grid-cols-4">
               {cells.map((cell, ci) => (
                 <div
@@ -240,7 +240,7 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
       </div>
 
       {error && (
-        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F7F5EF' }}>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#FBFAF6' }}>
           <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
           <button onClick={() => { startedRef.current = false; fetchPRD(); }} className="btn-primary text-xs">Retry</button>
         </div>
@@ -249,8 +249,8 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
       {loading && (
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #D2D2D7' }}>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex" style={{ borderBottom: '1px solid #F7F5EF' }}>
-              <div className="w-[3px] shrink-0" style={{ background: '#F7F5EF' }} />
+            <div key={i} className="flex" style={{ borderBottom: '1px solid #FBFAF6' }}>
+              <div className="w-[3px] shrink-0" style={{ background: '#FBFAF6' }} />
               <div className="flex-1 px-6 py-4 flex items-center justify-between">
                 <div className="loading-bar h-2.5 w-40 rounded" />
                 <div className="loading-bar h-2 w-12 rounded" />
