@@ -81,7 +81,7 @@ function InsightRow({
       <button
         onClick={onToggle}
         className="shrink-0 mt-0.5 w-4 h-4 transition-colors duration-150 flex items-center justify-center mr-4 rounded"
-        style={{ border: `1px solid ${selected ? '#26221D' : '#D2D2D7'}`, background: selected ? '#26221D' : 'white' }}
+        style={{ border: `1px solid ${selected ? '#26221D' : '#A1A1A6'}`, background: selected ? '#26221D' : 'white' }}
         title={selected ? 'Deselect' : 'Select'}
       >
         {selected && (
@@ -174,7 +174,7 @@ function ImpactGroup({
         <Stars level={level} />
         <span className="text-[9px] tracking-[0.2em] uppercase" style={{ color: '#6E6E73' }}>{level}</span>
         <div className="flex-1 h-px" style={{ background: '#FBFAF6' }} />
-        <span className="text-[9px]" style={{ color: '#D2D2D7' }}>{items.length}</span>
+        <span className="text-[9px]" style={{ color: '#A1A1A6' }}>{items.length}</span>
       </div>
       {items.map((item, i) => (
         <InsightRow
@@ -375,12 +375,12 @@ export default function InsightPage({ productName, cards, insights, setInsights,
             {INSIGHT_STEPS.map((step, i) => (
               <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= insightStep ? 'opacity-100' : 'opacity-20'}`}>
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                  background: i < insightStep ? '#6E6E73' : i === insightStep ? '#127A74' : '#D2D2D7',
+                  background: i < insightStep ? '#6E6E73' : i === insightStep ? '#127A74' : '#A1A1A6',
                 }} />
                 <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: i === insightStep ? '#127A74' : '#6E6E73' }}>
                   {step}
                   {i === insightStep && <span className="ml-1">…</span>}
-                  {i < insightStep && <span className="ml-1" style={{ color: '#D2D2D7' }}>✓</span>}
+                  {i < insightStep && <span className="ml-1" style={{ color: '#A1A1A6' }}>✓</span>}
                 </span>
               </div>
             ))}
@@ -392,7 +392,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
       {insights && !loading && (
         <div className="flex items-center gap-6 mb-10 pb-6" style={{ borderBottom: '1px solid #D2D2D7' }}>
           <div className="flex items-center gap-5">
-            <span className="text-[9px] tracking-widest uppercase" style={{ color: '#D2D2D7' }}>{totalInsights} insights</span>
+            <span className="text-[9px] tracking-widest uppercase" style={{ color: '#A1A1A6' }}>{totalInsights} insights</span>
             {criticalCount > 0 && (
               <span className="flex items-center gap-1 text-[9px] tracking-widest uppercase" style={{ color: '#6E6E73' }}>
                 <Stars level="Critical" /> {criticalCount} critical
@@ -505,7 +505,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
               </svg>
             </button>
           </div>
-          <p className="text-xs mt-4" style={{ color: '#D2D2D7' }}>
+          <p className="text-xs mt-4" style={{ color: '#A1A1A6' }}>
             {selected.size === 0
               ? 'Select at least one insight to continue'
               : `${selected.size} of ${totalInsights} selected`}

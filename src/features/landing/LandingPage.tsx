@@ -60,7 +60,7 @@ export default function LandingPage({ onStart }: Props) {
               <div key={step.num} className="p-8 rounded-2xl" style={{ background: '#FDFCF9' }}>
                 <span
                   className="font-semibold block mb-6 leading-none select-none"
-                  style={{ fontSize: '3rem', color: '#D2D2D7' }}
+                  style={{ fontSize: '3rem', color: '#A1A1A6' }}
                 >
                   {step.num}
                 </span>

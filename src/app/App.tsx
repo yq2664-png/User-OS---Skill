@@ -127,12 +127,12 @@ export default function App() {
                       {/* Label row */}
                       <div className="flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                          background: isActive ? '#127A74' : isDone ? '#6E6E73' : '#D2D2D7',
+                          background: isActive ? '#127A74' : isDone ? '#6E6E73' : '#A1A1A6',
                         }} />
                         <span
                           className="text-[11px] font-medium"
                           style={{
-                            color: isActive ? '#127A74' : isDone ? '#1D1D1F' : '#D2D2D7',
+                            color: isActive ? '#127A74' : isDone ? '#1D1D1F' : '#A1A1A6',
                             transition: 'color 0.24s cubic-bezier(0.4,0,0.6,1)',
                           }}
                         >

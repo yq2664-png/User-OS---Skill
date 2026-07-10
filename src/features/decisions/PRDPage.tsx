@@ -33,7 +33,7 @@ const PRD_STEPS = [
 function PRDRow({ section, index }: { section: PRDSection; index: number }) {
   const [expanded, setExpanded] = useState(false);
   const cells = [section.problem, section.userStory, section.requirement, section.successMetric];
-  const color = PRIORITY_COLOR[section.priority] ?? '#D2D2D7';
+  const color = PRIORITY_COLOR[section.priority] ?? '#A1A1A6';
 
   return (
     <div
@@ -68,7 +68,7 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
             <svg
               width="12" height="12" viewBox="0 0 12 12" fill="none"
               className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
-              style={{ color: '#D2D2D7' }}
+              style={{ color: '#A1A1A6' }}
             >
               <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -226,12 +226,12 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
             {PRD_STEPS.map((step, i) => (
               <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= prdStep ? 'opacity-100' : 'opacity-20'}`}>
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                  background: i < prdStep ? '#6E6E73' : i === prdStep ? '#127A74' : '#D2D2D7',
+                  background: i < prdStep ? '#6E6E73' : i === prdStep ? '#127A74' : '#A1A1A6',
                 }} />
                 <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: i === prdStep ? '#127A74' : '#6E6E73' }}>
                   {step}
                   {i === prdStep && <span className="ml-1">…</span>}
-                  {i < prdStep && <span className="ml-1" style={{ color: '#D2D2D7' }}>✓</span>}
+                  {i < prdStep && <span className="ml-1" style={{ color: '#A1A1A6' }}>✓</span>}
                 </span>
               </div>
             ))}

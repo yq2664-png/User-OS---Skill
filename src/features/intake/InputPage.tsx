@@ -157,7 +157,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                     transition: 'background 0.24s cubic-bezier(0.4,0,0.6,1)',
                   }}
                 >
-                  <span className="text-[9px] tracking-widest uppercase block mb-4" style={{ color: selected ? '#6E6E73' : '#D2D2D7' }}>
+                  <span className="text-[9px] tracking-widest uppercase block mb-4" style={{ color: selected ? '#6E6E73' : '#A1A1A6' }}>
                     0{i + 1}
                   </span>
                   <span className="block text-base font-semibold leading-snug mb-1.5" style={{ color: selected ? 'white' : '#1D1D1F' }}>
@@ -241,7 +241,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                   className="w-full py-5 text-center rounded-xl transition-colors"
                   style={{ background: '#FBFAF6', border: 'none' }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="mx-auto mb-1" style={{ color: '#D2D2D7' }}>
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="mx-auto mb-1" style={{ color: '#A1A1A6' }}>
                     <path d="M10 3v10M6 7l4-4 4 4M3 14v1a2 2 0 002 2h10a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   <span className="text-sm" style={{ color: '#6E6E73' }}>Click to upload</span>
@@ -256,7 +256,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                     {formData.documents.map((f, i) => (
                       <div key={i} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i < formData.documents.length - 1 ? '1px solid #F2EFE9' : 'none' }}>
                         <span className="text-sm truncate" style={{ color: '#6E6E73' }}>{f.name}</span>
-                        <button type="button" className="ml-4 text-xs shrink-0" style={{ color: '#D2D2D7' }}
+                        <button type="button" className="ml-4 text-xs shrink-0" style={{ color: '#A1A1A6' }}
                           onClick={() => setFormData({ ...formData, documents: formData.documents.filter((_, j) => j !== i) })}>
                           Remove
                         </button>
@@ -287,8 +287,8 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
               <label className="label-tag block mb-2">
                 Context
                 {stage === 'unpublished'
-                  ? <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>or design documents above</span>
-                  : <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span>}
+                  ? <span className="ml-1 normal-case font-normal" style={{ color: '#A1A1A6' }}>or design documents above</span>
+                  : <span className="ml-1 normal-case font-normal" style={{ color: '#A1A1A6' }}>optional</span>}
               </label>
               <textarea
                 className="w-full text-[#1D1D1F] outline-none rounded-xl px-4 py-3 resize-none"
@@ -432,7 +432,7 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
                             <ul className="space-y-1">
                               {verifyResult.features.map((f, i) => (
                                 <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: '#1D1D1F' }}>
-                                  <span className="mt-0.5" style={{ color: '#D2D2D7' }}>–</span>{f}
+                                  <span className="mt-0.5" style={{ color: '#A1A1A6' }}>–</span>{f}
                                 </li>
                               ))}
                             </ul>

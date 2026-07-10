@@ -46,7 +46,7 @@ function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onR
       <button
         onClick={onRemove}
         className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-        style={{ color: '#D2D2D7' }}
+        style={{ color: '#A1A1A6' }}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -87,13 +87,13 @@ function PersonaCard({ card, index, onRemove }: { card: Card; index: number; onR
             {card.worry && (
               <div className="mb-3">
                 <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Worry</p>
-                <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.worry}</p>
+                <p className="text-xs leading-relaxed" style={{ color: '#C7C7CC' }}>{card.worry}</p>
               </div>
             )}
             {card.assumption && (
               <div>
                 <p className="text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: '#6E6E73' }}>Assumption</p>
-                <p className="text-xs leading-relaxed" style={{ color: '#D2D2D7' }}>{card.assumption}</p>
+                <p className="text-xs leading-relaxed" style={{ color: '#C7C7CC' }}>{card.assumption}</p>
               </div>
             )}
           </div>
@@ -123,7 +123,7 @@ function RealCardItem({ card, index, onRemove }: { card: RealCard; index: number
       <button
         onClick={onRemove}
         className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-        style={{ color: '#D2D2D7' }}
+        style={{ color: '#A1A1A6' }}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -349,14 +349,14 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
             {SIM_STEPS.map((step, i) => (
               <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= simStep ? 'opacity-100' : 'opacity-20'}`}>
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                  background: i < simStep ? '#6E6E73' : i === simStep ? '#127A74' : '#D2D2D7',
+                  background: i < simStep ? '#6E6E73' : i === simStep ? '#127A74' : '#A1A1A6',
                 }} />
                 <span className="text-[10px] tracking-[0.15em] uppercase" style={{
                   color: i === simStep ? '#127A74' : '#6E6E73',
                 }}>
                   {step}
                   {i === simStep && <span className="ml-1">…</span>}
-                  {i < simStep && <span className="ml-1" style={{ color: '#D2D2D7' }}>✓</span>}
+                  {i < simStep && <span className="ml-1" style={{ color: '#A1A1A6' }}>✓</span>}
                 </span>
               </div>
             ))}
@@ -402,7 +402,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
 
           {realError && (
             <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ background: '#FBFAF6' }}>
-              <span className="mt-0.5 shrink-0" style={{ color: '#D2D2D7' }}>
+              <span className="mt-0.5 shrink-0" style={{ color: '#A1A1A6' }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
                   <path d="M7 4v3.5M7 10h.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
@@ -535,13 +535,13 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                   <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 Add your own perspective
-                <span className="ml-1 normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span>
+                <span className="ml-1 normal-case font-normal" style={{ color: '#A1A1A6' }}>optional</span>
               </button>
             ) : (
             <>
             <p className="text-sm font-semibold mb-1" style={{ color: '#1D1D1F' }}>
               Add your own perspective
-              <span className="ml-1.5 text-xs normal-case font-normal" style={{ color: '#D2D2D7' }}>optional</span>
+              <span className="ml-1.5 text-xs normal-case font-normal" style={{ color: '#A1A1A6' }}>optional</span>
             </p>
             <p className="text-xs mb-4" style={{ color: '#6E6E73' }}>
               Heard something real from a user, a review, or an interview? Add it — it’s analyzed alongside the simulated ones.
