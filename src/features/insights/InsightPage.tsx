@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Card, Insights, InsightItem, ImpactLevel } from '../App';
-import { encodeShare } from '../utils/shareLink';
+import type { Card, Insights, InsightItem, ImpactLevel } from '@/shared/types';
+import { encodeShare } from '@/shared/lib/shareLink';
+import { getInsights } from './api';
 
 interface Props {
   productName: string;
@@ -222,14 +223,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
       setInsightStep(step);
     }, 2800);
     try {
-      const res = await fetch('/api/insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cards, productName }),
-      });
-      if (!res.ok) throw new Error('Server error');
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      const data = await getInsights(cards, productName);
       setInsights(data);
     } catch (e: any) {
       setError(e.message || 'Something went wrong.');
@@ -318,7 +312,9 @@ export default function InsightPage({ productName, cards, insights, setInsights,
           if (y > 260) { doc.addPage(); y = margin; }
           const stars = '★'.repeat(IMPACT_STARS[item.impact ?? 'Medium'] ?? 2) + '☆'.repeat(4 - (IMPACT_STARS[item.impact ?? 'Medium'] ?? 2));
           write(`${stars}  ${item.title}`, 10, 'bold', [20, 20, 20], 1);
-          write(item.description, 9, 'normal', [90, 90, 90], 1);
+          if (item.behavioralInsight) write(`"${item.behavioralInsight}"`, 9, 'normal', [90, 90, 90], 1);
+          if (item.observation) write(`Observed:  ${item.observation}`, 8, 'normal', [120, 120, 120], 1);
+          if (item.interpretation) write(`Why:  ${item.interpretation}`, 8, 'normal', [120, 120, 120], 1);
           if (item.valueNote) write(item.valueNote, 8, 'normal', [150, 150, 150], 4);
           else y += 2;
         }

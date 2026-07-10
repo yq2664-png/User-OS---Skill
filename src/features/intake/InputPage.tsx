@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FormData, ProductStage } from '../App';
+import type { FormData, ProductStage } from '@/shared/types';
+import { verifyProduct } from './api';
 
 function FormRow({ label, hint, children }: { label: string; hint: string; children: React.ReactNode }) {
   return (
@@ -99,17 +100,11 @@ export default function InputPage({ formData, setFormData, onSubmit }: Props) {
     setVerifyResult(null);
     setMultipleResults([]);
     try {
-      const res = await fetch('/api/verify-product', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          webLink: formData.webLink,
-          productName: formData.productName,
-          productStage: stage,
-        }),
+      const data = await verifyProduct({
+        webLink: formData.webLink,
+        productName: formData.productName,
+        productStage: stage,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Could not verify product');
       if (data.multiple) {
         setMultipleResults(data.multiple);
         setVerifyStatus('multiple');

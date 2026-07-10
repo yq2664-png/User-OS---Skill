@@ -1,98 +1,14 @@
 import { useEffect, useState } from 'react';
-import { decodeShare } from './utils/shareLink';
-import LandingPage from './pages/LandingPage';
-import InputPage from './pages/InputPage';
-import SimulationPage from './pages/SimulationPage';
-import InsightPage from './pages/InsightPage';
-import PRDPage from './pages/PRDPage';
-
-export type Page = 'landing' | 'input' | 'simulation' | 'insights' | 'prd';
-export type ProductStage = 'unpublished' | 'web' | 'client';
-
-export interface FeatureConstraint {
-  module: string;
-  constraint: string;
-}
-
-export interface TimeConstraint {
-  timeline: string;
-  description: string;
-}
-
-export interface FormData {
-  productName: string;
-  productStage: ProductStage | '';
-  productType: string;
-  coreFunctions: string;
-  webLink: string;
-  requirements: string;
-  featureConstraints: FeatureConstraint[];
-  timeConstraints: TimeConstraint[];
-  screenshots: File[];
-  documents: File[];
-}
-
-export interface Card {
-  perspective: string;   // motivation-based label e.g. "Looking for Simplicity"
-  driver: string;        // what the user is trying to achieve
-  thought: string;       // first-person reaction
-  highlight?: string;
-  worry?: string;        // what they're afraid of
-  assumption?: string;   // underlying belief driving their behavior
-  name?: string;         // humanised persona name e.g. "Marcus"
-  age?: number;          // persona age
-  occupation?: string;   // persona occupation
-  manual?: boolean;      // added by the user, not AI-simulated
-}
-
-export interface RealCard {
-  source: string;
-  sourceUrl?: string;
-  persona: string;
-  quote: string;
-  highlight?: string;
-  sentiment: 'positive' | 'neutral' | 'negative';
-}
-
-export type ImpactLevel = 'Critical' | 'High' | 'Medium' | 'Low';
-export type EffortLevel = 'High' | 'Medium' | 'Low';
-
-export interface InsightItem {
-  rank: number;
-  title: string;
-  observation: string;
-  interpretation: string;
-  behavioralInsight: string;
-  score: number;
-  impact: ImpactLevel;
-  valueNote: string;
-}
-
-export interface Insights {
-  frustrations: InsightItem[];
-  hiddenNeeds: InsightItem[];
-  decisionBarriers: InsightItem[];
-  trustIssues: InsightItem[];
-  opportunities: InsightItem[];
-}
-
-export interface PRDSection {
-  id: number;
-  name: string;
-  priority: 'Critical' | 'High' | 'Medium' | 'Low';
-  impact: 'High' | 'Medium' | 'Low';
-  confidence: number;   // 0–100
-  effort: EffortLevel;
-  problem: string;
-  userStory: string;
-  requirement: string;
-  successMetric: string;
-}
-
-export interface PRDData {
-  title: string;
-  sections: PRDSection[];
-}
+import { decodeShare } from '@/shared/lib/shareLink';
+import type { Page } from './routes';
+import type { FormData, Card, Insights } from '@/shared/types';
+import type { RealCard } from '@/features/perspectives/types';
+import type { PRDData } from '@/features/decisions/types';
+import LandingPage from '@/features/landing/LandingPage';
+import InputPage from '@/features/intake/InputPage';
+import SimulationPage from '@/features/perspectives/SimulationPage';
+import InsightPage from '@/features/insights/InsightPage';
+import PRDPage from '@/features/decisions/PRDPage';
 
 const BLANK_FORM: FormData = {
   productName: '',

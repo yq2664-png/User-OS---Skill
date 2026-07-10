@@ -1,9 +1,9 @@
-import p_m01 from '../assets/personas/persona-male-01.png';
-import p_m02 from '../assets/personas/persona-male-02.png';
-import p_m03 from '../assets/personas/persona-male-03.png';
-import p_f01 from '../assets/personas/persona-female-01.png';
-import p_f02 from '../assets/personas/persona-female-02.png';
-import p_f03 from '../assets/personas/persona-female-03.png';
+import p_m01 from '../assets/persona-male-01.png';
+import p_m02 from '../assets/persona-male-02.png';
+import p_m03 from '../assets/persona-male-03.png';
+import p_f01 from '../assets/persona-female-01.png';
+import p_f02 from '../assets/persona-female-02.png';
+import p_f03 from '../assets/persona-female-03.png';
 
 export interface Persona {
   id: string;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useAnimationFrame, useMotionValue, useTransform } from 'framer-motion';
-import { PERSONAS } from '../data/personas';
-import PersonaCard from './PersonaCard';
+import { PERSONAS } from '@/features/personas/data/personas';
+import PersonaCard from '@/features/personas/components/PersonaCard';
 
 const CARD = 224;
 

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Card, FormData, RealCard } from '../App';
+import type { Card, FormData } from '@/shared/types';
+import type { RealCard } from './types';
+import { getRealPerspectives, streamSimulation } from './api';
 
 function HighlightedThought({ thought, highlight }: { thought: string; highlight?: string }) {
   if (!highlight) return <span style={{ color: '#1D1D1F' }}>{thought}</span>;
@@ -197,19 +199,11 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
     setRealLoading(true);
     setRealError('');
     try {
-      const res = await fetch('/api/real-perspectives', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productName: formData.productName,
-          webLink: formData.webLink,
-          productStage: formData.productStage,
-        }),
+      const newCards = await getRealPerspectives({
+        productName: formData.productName,
+        webLink: formData.webLink,
+        productStage: formData.productStage,
       });
-      if (!res.ok) throw new Error(`Server returned ${res.status}`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      const newCards = data.cards ?? [];
       setRealCards(searchMore ? prev => [...prev, ...newCards] : newCards);
     } catch (e: any) {
       setRealError(e.message || 'Could not load real perspectives.');
@@ -236,24 +230,8 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
     setError('');
     bufferRef.current = '';
 
-    const body = new FormData();
-    body.append('productName', formData.productName);
-    body.append('productStage', formData.productStage);
-    body.append('productType', formData.productType);
-    body.append('coreFunctions', formData.coreFunctions);
-    body.append('requirements', formData.requirements);
-    body.append('webLink', formData.webLink);
-    body.append('featureConstraints', JSON.stringify(formData.featureConstraints));
-    body.append('timeConstraints', JSON.stringify(formData.timeConstraints));
-    if (more) {
-      body.append('count', '4');
-      body.append('existingPersonas', JSON.stringify(cardsRef.current.map(c => c.perspective)));
-    }
-    for (const file of formData.screenshots) body.append('screenshots', file);
-    for (const file of formData.documents) body.append('documents', file);
-
     try {
-      const res = await fetch('/api/simulate', { method: 'POST', body });
+      const res = await streamSimulation(formData, more, cardsRef.current.map(c => c.perspective));
       if (!res.ok) throw new Error('Server error');
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();

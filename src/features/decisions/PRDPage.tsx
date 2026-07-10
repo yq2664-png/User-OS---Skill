@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { encodeShare } from '../utils/shareLink';
-import type { Insights, PRDData, PRDSection } from '../App';
+import { encodeShare } from '@/shared/lib/shareLink';
+import type { Insights } from '@/shared/types';
+import type { PRDData, PRDSection } from './types';
+import { getPrd } from './api';
 
 interface Props {
   productName: string;
@@ -131,14 +133,7 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
       setPrdStep(step);
     }, 2800);
     try {
-      const res = await fetch('/api/prd', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productName, insights }),
-      });
-      if (!res.ok) throw new Error('Server error');
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      const data = await getPrd(productName, insights);
       setPrdData(data);
     } catch (e: any) {
       setError(e.message || 'Something went wrong.');
