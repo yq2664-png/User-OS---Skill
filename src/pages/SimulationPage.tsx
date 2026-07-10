@@ -133,7 +133,7 @@ function RealCardItem({ card, index, onRemove }: { card: RealCard; index: number
           <a href={card.sourceUrl} target="_blank" rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
             className="text-[10px] tracking-[0.12em] uppercase underline underline-offset-2"
-            style={{ color: '#0071E3' }}>
+            style={{ color: '#127A74' }}>
             {card.source}
           </a>
         ) : (
@@ -369,10 +369,10 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
             {SIM_STEPS.map((step, i) => (
               <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= simStep ? 'opacity-100' : 'opacity-20'}`}>
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                  background: i < simStep ? '#6E6E73' : i === simStep ? '#0071E3' : '#D2D2D7',
+                  background: i < simStep ? '#6E6E73' : i === simStep ? '#127A74' : '#D2D2D7',
                 }} />
                 <span className="text-[10px] tracking-[0.15em] uppercase" style={{
-                  color: i === simStep ? '#0071E3' : '#6E6E73',
+                  color: i === simStep ? '#127A74' : '#6E6E73',
                 }}>
                   {step}
                   {i === simStep && <span className="ml-1">…</span>}
@@ -386,7 +386,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
 
       {/* Error */}
       {error && (
-        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F5F5F7' }}>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F7F5EF' }}>
           <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
           <button onClick={() => { startedRef.current = false; runSimulation(); }} className="btn-primary text-xs">Retry</button>
         </div>
@@ -406,7 +406,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
           {realLoading && realCards.length === 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
+                <div key={i} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
                   <div className="flex justify-between mb-4">
                     <div className="loading-bar h-2 w-20 rounded" />
                     <div className="loading-bar h-2 w-14 rounded" />
@@ -421,7 +421,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
           )}
 
           {realError && (
-            <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ background: '#F5F5F7' }}>
+            <div className="flex items-start gap-4 p-6 rounded-2xl" style={{ background: '#F7F5EF' }}>
               <span className="mt-0.5 shrink-0" style={{ color: '#D2D2D7' }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
@@ -440,7 +440,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 <RealCardItem key={i} card={card} index={i} onRemove={() => removeRealCard(i)} />
               ))}
               {realLoading && [1, 2].map(i => (
-                <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
+                <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
                   <div className="flex justify-between mb-4">
                     <div className="loading-bar h-2 w-20 rounded" />
                     <div className="loading-bar h-2 w-14 rounded" />
@@ -455,7 +455,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
           )}
 
           {!realLoading && !realError && realCards.length === 0 && (
-            <p className="text-sm p-6 rounded-2xl" style={{ color: '#6E6E73', background: '#F5F5F7' }}>
+            <p className="text-sm p-6 rounded-2xl" style={{ color: '#6E6E73', background: '#F7F5EF' }}>
               No real user reviews found online for this product.
             </p>
           )}
@@ -487,7 +487,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
             <PersonaCard key={`sim-${i}`} card={card} index={i} onRemove={() => removeCard(i)} />
           ))}
           {streaming && Array.from({ length: Math.max(0, 8 - cards.filter(c => !c.manual).length) }).map((_, i) => (
-            <div key={`ph-${i}`} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
+            <div key={`ph-${i}`} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
               <div className="flex items-center justify-between mb-5">
                 <div className="loading-bar h-2 w-24 rounded" />
                 <div className="loading-bar h-2 w-16 rounded" />
@@ -499,7 +499,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
             </div>
           ))}
           {loadingMore && Array.from({ length: 4 }).map((_, i) => (
-            <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F5F5F7' }}>
+            <div key={`more-${i}`} className="p-8 rounded-2xl" style={{ background: '#F7F5EF' }}>
               <div className="flex items-center justify-between mb-5">
                 <div className="loading-bar h-2 w-24 rounded" />
                 <div className="loading-bar h-2 w-16 rounded" />
@@ -549,7 +549,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
               <button
                 onClick={() => setShowManual(true)}
                 className="text-sm font-medium w-full flex items-center justify-end gap-1.5 transition-opacity"
-                style={{ background: 'none', border: 'none', padding: 0, color: '#0071E3' }}
+                style={{ background: 'none', border: 'none', padding: 0, color: '#127A74' }}
               >
                 <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
                   <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -573,7 +573,7 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 onChange={e => setManualLabel(e.target.value)}
                 placeholder="Perspective type (optional) — e.g. Power user, Skeptic"
                 className="w-full rounded-xl px-4 py-2.5 outline-none"
-                style={{ fontSize: '14px', background: '#F5F5F7', border: 'none', color: '#1D1D1F' }}
+                style={{ fontSize: '14px', background: '#F7F5EF', border: 'none', color: '#1D1D1F' }}
               />
               <textarea
                 value={manualThought}
@@ -582,14 +582,14 @@ export default function SimulationPage({ formData, cards, setCards, realCards, s
                 rows={2}
                 placeholder="What did they actually say or do? (first-person works best)"
                 className="w-full rounded-xl px-4 py-2.5 outline-none resize-none"
-                style={{ fontSize: '14px', background: '#F5F5F7', border: 'none', color: '#1D1D1F' }}
+                style={{ fontSize: '14px', background: '#F7F5EF', border: 'none', color: '#1D1D1F' }}
               />
               <div className="flex justify-end">
                 <button
                   onClick={addManualCard}
                   disabled={!manualThought.trim()}
                   className={`text-xs font-medium inline-flex items-center gap-1 transition-opacity ${!manualThought.trim() ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  style={{ background: 'none', border: 'none', padding: 0, color: '#0071E3' }}
+                  style={{ background: 'none', border: 'none', padding: 0, color: '#127A74' }}
                 >
                   Add perspective
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">

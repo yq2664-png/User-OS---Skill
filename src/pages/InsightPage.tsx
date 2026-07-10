@@ -71,7 +71,7 @@ function InsightRow({
   return (
     <div
       className={`card-enter py-5 flex gap-0 transition-opacity duration-150 ${selected ? 'opacity-100' : 'opacity-40'}`}
-      style={{ animationDelay: `${animDelay}ms`, borderBottom: '1px solid #F5F5F7' }}
+      style={{ animationDelay: `${animDelay}ms`, borderBottom: '1px solid #F7F5EF' }}
     >
       {/* Priority color bar */}
       <div className="w-[3px] shrink-0 mr-5 rounded-full self-stretch" style={{ background: color }} />
@@ -80,7 +80,7 @@ function InsightRow({
       <button
         onClick={onToggle}
         className="shrink-0 mt-0.5 w-4 h-4 transition-colors duration-150 flex items-center justify-center mr-4 rounded"
-        style={{ border: `1px solid ${selected ? '#1D1D1F' : '#D2D2D7'}`, background: selected ? '#1D1D1F' : 'white' }}
+        style={{ border: `1px solid ${selected ? '#26221D' : '#D2D2D7'}`, background: selected ? '#26221D' : 'white' }}
         title={selected ? 'Deselect' : 'Select'}
       >
         {selected && (
@@ -172,7 +172,7 @@ function ImpactGroup({
       <div className="flex items-center gap-2 py-2 mb-1">
         <Stars level={level} />
         <span className="text-[9px] tracking-[0.2em] uppercase" style={{ color: '#6E6E73' }}>{level}</span>
-        <div className="flex-1 h-px" style={{ background: '#F5F5F7' }} />
+        <div className="flex-1 h-px" style={{ background: '#F7F5EF' }} />
         <span className="text-[9px]" style={{ color: '#D2D2D7' }}>{items.length}</span>
       </div>
       {items.map((item, i) => (
@@ -379,9 +379,9 @@ export default function InsightPage({ productName, cards, insights, setInsights,
             {INSIGHT_STEPS.map((step, i) => (
               <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= insightStep ? 'opacity-100' : 'opacity-20'}`}>
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                  background: i < insightStep ? '#6E6E73' : i === insightStep ? '#0071E3' : '#D2D2D7',
+                  background: i < insightStep ? '#6E6E73' : i === insightStep ? '#127A74' : '#D2D2D7',
                 }} />
-                <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: i === insightStep ? '#0071E3' : '#6E6E73' }}>
+                <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: i === insightStep ? '#127A74' : '#6E6E73' }}>
                   {step}
                   {i === insightStep && <span className="ml-1">…</span>}
                   {i < insightStep && <span className="ml-1" style={{ color: '#D2D2D7' }}>✓</span>}
@@ -416,7 +416,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
 
       {/* Error */}
       {error && (
-        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F5F5F7' }}>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F7F5EF' }}>
           <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
           <button onClick={() => { startedRef.current = false; fetchInsights(); }} className="btn-primary text-xs">Retry</button>
         </div>
@@ -429,7 +429,7 @@ export default function InsightPage({ productName, cards, insights, setInsights,
             <div key={s.key}>
               <div className="loading-bar h-3 w-40 rounded mb-6" />
               {[1, 2, 3].map(i => (
-                <div key={i} className="py-5 flex gap-5" style={{ borderBottom: '1px solid #F5F5F7' }}>
+                <div key={i} className="py-5 flex gap-5" style={{ borderBottom: '1px solid #F7F5EF' }}>
                   <div className="shrink-0 w-16 space-y-2">
                     <div className="loading-bar h-5 w-12 rounded" />
                     <div className="loading-bar h-px w-full" />

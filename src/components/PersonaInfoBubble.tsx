@@ -35,7 +35,7 @@ export default function PersonaInfoBubble({ persona }: { persona: Persona }) {
         </p>
         <p style={{ fontSize: 10, color: '#6E6E73', lineHeight: 1.45 }}>{persona.occupation}</p>
         <p style={{ fontSize: 10, color: '#6E6E73', lineHeight: 1.45 }}>{persona.city}</p>
-        <p style={{ fontSize: 9, color: '#0071E3', fontWeight: 600, marginTop: 5, lineHeight: 1, letterSpacing: '0.02em' }}>
+        <p style={{ fontSize: 9, color: '#2E6E4E', fontWeight: 600, marginTop: 5, lineHeight: 1, letterSpacing: '0.02em' }}>
           {persona.personality}
         </p>
         {/* Arrow tail */}

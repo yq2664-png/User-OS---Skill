@@ -15,35 +15,62 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
-const ANTHROPIC_HEADERS = {
-  'x-api-key': ANTHROPIC_KEY,
-  'anthropic-version': '2023-06-01',
+const OPENAI_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_BASE = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+const OPENAI_HEADERS = {
+  Authorization: `Bearer ${OPENAI_KEY}`,
   'content-type': 'application/json',
 };
 
-async function claudeCreate(model, max_tokens, messages) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: ANTHROPIC_HEADERS,
-    body: JSON.stringify({ model, max_tokens, messages }),
+const MODELS = {
+  simulate: process.env.OPENAI_MODEL_SIMULATE || 'gpt-4o',
+  fast: process.env.OPENAI_MODEL_FAST || 'gpt-4o-mini',
+  prd: process.env.OPENAI_MODEL_PRD || 'gpt-4o',
+};
+
+function toOpenAIContent(content) {
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return content;
+  return content.map((part) => {
+    if (part.type === 'text') return { type: 'text', text: part.text };
+    if (part.type === 'image') {
+      const { media_type, data } = part.source;
+      return { type: 'image_url', image_url: { url: `data:${media_type};base64,${data}` } };
+    }
+    return part;
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Anthropic API error ${res.status}: ${err}`);
-  }
-  return res.json();
 }
 
-async function claudeStream(model, max_tokens, messages, onText, onDone) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+function toOpenAIMessages(messages) {
+  return messages.map((m) => ({
+    role: m.role,
+    content: toOpenAIContent(m.content),
+  }));
+}
+
+async function openaiCreate(model, max_tokens, messages) {
+  const res = await fetch(`${OPENAI_BASE}/chat/completions`, {
     method: 'POST',
-    headers: ANTHROPIC_HEADERS,
-    body: JSON.stringify({ model, max_tokens, messages, stream: true }),
+    headers: OPENAI_HEADERS,
+    body: JSON.stringify({ model, max_tokens, messages: toOpenAIMessages(messages) }),
   });
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Anthropic stream error ${res.status}: ${err}`);
+    throw new Error(`OpenAI API error ${res.status}: ${err}`);
+  }
+  const data = await res.json();
+  return { content: [{ text: data.choices[0].message.content ?? '' }] };
+}
+
+async function openaiStream(model, max_tokens, messages, onText, onDone) {
+  const res = await fetch(`${OPENAI_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: OPENAI_HEADERS,
+    body: JSON.stringify({ model, max_tokens, messages: toOpenAIMessages(messages), stream: true }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`OpenAI stream error ${res.status}: ${err}`);
   }
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -60,9 +87,8 @@ async function claudeStream(model, max_tokens, messages, onText, onDone) {
       if (payload === '[DONE]') continue;
       try {
         const evt = JSON.parse(payload);
-        if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-          onText(evt.delta.text);
-        }
+        const text = evt.choices?.[0]?.delta?.content;
+        if (text) onText(text);
       } catch {}
     }
   }
@@ -120,8 +146,8 @@ app.post('/api/simulate', upload.fields([{ name: 'screenshots', maxCount: 5 }, {
   content.push({ type: 'text', text: buildSimulatePrompt(productName, productType, productDesc, existingPersonas, count, fc, tc, productStage, webLink, webContent) });
 
   try {
-    await claudeStream(
-      'claude-opus-4-8',
+    await openaiStream(
+      MODELS.simulate,
       4000,
       [{ role: 'user', content }],
       (text) => res.write(`data: ${JSON.stringify({ text })}\n\n`),
@@ -336,7 +362,7 @@ app.post('/api/real-perspectives', async (req, res) => {
     .slice(0, 10000);
 
   try {
-    const message = await claudeCreate('claude-haiku-4-5-20251001', 2000, [{
+    const message = await openaiCreate(MODELS.fast, 2000, [{
         role: 'user',
         content: `You are extracting real user perspectives about "${productName}" from multiple web sources.
 
@@ -461,7 +487,7 @@ app.post('/api/verify-product', async (req, res) => {
   }
 
   try {
-    const message = await claudeCreate('claude-haiku-4-5-20251001', 500, [{
+    const message = await openaiCreate(MODELS.fast, 500, [{
         role: 'user',
         content: `Based on the following web page content, extract key information about this product.
 
@@ -493,7 +519,7 @@ app.post('/api/insights', async (req, res) => {
     return res.status(400).json({ error: 'No perspective cards provided' });
   }
   try {
-    const message = await claudeCreate('claude-haiku-4-5-20251001', 5000, [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]);
+    const message = await openaiCreate(MODELS.fast, 5000, [{ role: 'user', content: buildInsightsPrompt(cards, productName) }]);
     const text = message.content[0].text;
     const parsed = extractJSON(text);
     if (parsed) res.json(parsed);
@@ -507,7 +533,7 @@ app.post('/api/insights', async (req, res) => {
 app.post('/api/prd', async (req, res) => {
   const { productName, insights } = req.body;
   try {
-    const message = await claudeCreate('claude-sonnet-4-6', 5000, [{ role: 'user', content: buildPRDPrompt(productName, insights) }]);
+    const message = await openaiCreate(MODELS.prd, 5000, [{ role: 'user', content: buildPRDPrompt(productName, insights) }]);
     const text = message.content[0].text;
     const parsed = extractJSON(text);
     if (parsed) res.json(parsed);

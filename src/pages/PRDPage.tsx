@@ -36,7 +36,7 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
   return (
     <div
       className="card-enter flex"
-      style={{ animationDelay: `${index * 80}ms`, borderBottom: '1px solid #F5F5F7' }}
+      style={{ animationDelay: `${index * 80}ms`, borderBottom: '1px solid #F7F5EF' }}
     >
       <div className="w-[3px] shrink-0" style={{ background: color }} />
 
@@ -44,7 +44,7 @@ function PRDRow({ section, index }: { section: PRDSection; index: number }) {
         <button
           onClick={() => setExpanded(e => !e)}
           className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left transition-colors"
-          style={{ background: expanded ? '#F5F5F7' : 'white' }}
+          style={{ background: expanded ? '#F7F5EF' : 'white' }}
         >
           <span className="text-sm font-semibold truncate" style={{ color: '#1D1D1F' }}>
             {section.name || `Decision ${section.id}`}
@@ -231,9 +231,9 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
             {PRD_STEPS.map((step, i) => (
               <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${i <= prdStep ? 'opacity-100' : 'opacity-20'}`}>
                 <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                  background: i < prdStep ? '#6E6E73' : i === prdStep ? '#0071E3' : '#D2D2D7',
+                  background: i < prdStep ? '#6E6E73' : i === prdStep ? '#127A74' : '#D2D2D7',
                 }} />
-                <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: i === prdStep ? '#0071E3' : '#6E6E73' }}>
+                <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: i === prdStep ? '#127A74' : '#6E6E73' }}>
                   {step}
                   {i === prdStep && <span className="ml-1">…</span>}
                   {i < prdStep && <span className="ml-1" style={{ color: '#D2D2D7' }}>✓</span>}
@@ -245,7 +245,7 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
       </div>
 
       {error && (
-        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F5F5F7' }}>
+        <div className="p-6 mb-12 max-w-lg rounded-2xl" style={{ background: '#F7F5EF' }}>
           <p className="text-sm mb-4" style={{ color: '#1D1D1F' }}>{error}</p>
           <button onClick={() => { startedRef.current = false; fetchPRD(); }} className="btn-primary text-xs">Retry</button>
         </div>
@@ -254,8 +254,8 @@ export default function PRDPage({ productName, insights, prdData, setPrdData, on
       {loading && (
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #D2D2D7' }}>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex" style={{ borderBottom: '1px solid #F5F5F7' }}>
-              <div className="w-[3px] shrink-0" style={{ background: '#F5F5F7' }} />
+            <div key={i} className="flex" style={{ borderBottom: '1px solid #F7F5EF' }}>
+              <div className="w-[3px] shrink-0" style={{ background: '#F7F5EF' }} />
               <div className="flex-1 px-6 py-4 flex items-center justify-between">
                 <div className="loading-bar h-2.5 w-40 rounded" />
                 <div className="loading-bar h-2 w-12 rounded" />

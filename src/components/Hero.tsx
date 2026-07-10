@@ -6,18 +6,8 @@ interface Props {
 
 export default function Hero({ onStart }: Props) {
   return (
-    <section style={{
-      maxWidth: 1200,
-      margin: '0 auto',
-      width: '100%',
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      textAlign: 'center',
-      padding: '28px 64px 24px',   // 64px matches the nav (page-container px-16)
-      gap: 0,
-    }}>
+    <section className="hero-section">
+      <div className="hero-section__inner">
       {/* Eyebrow */}
       <p style={{
         fontSize: 11,
@@ -63,31 +53,13 @@ export default function Hero({ onStart }: Props) {
       </p>
 
       {/* CTA */}
-      <button
-        onClick={onStart}
-        style={{
-          height: 52,
-          padding: '0 32px',
-          background: '#0071E3',
-          color: 'white',
-          borderRadius: 9999,
-          border: 'none',
-          fontSize: 16,
-          fontWeight: 500,
-          cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
-          transition: 'background 0.16s ease',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.background = '#0077ED')}
-        onMouseLeave={e => (e.currentTarget.style.background = '#0071E3')}
-      >
+      <button onClick={onStart} className="btn-vintage">
         Start for free
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
+      </div>
     </section>
   );
 }

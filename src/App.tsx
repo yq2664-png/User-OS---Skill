@@ -163,9 +163,15 @@ export default function App() {
     (p === 'prd' && prdData !== null);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: '#FDFCF9' }}>
       {/* Nav */}
-      <nav className="sticky top-0 z-10 bg-white" style={{ borderBottom: '1px solid #D2D2D7' }}>
+      <nav
+        className="sticky top-0 z-10"
+        style={{
+          background: '#FDFCF9',
+          borderBottom: '1px solid rgba(224, 217, 203, 0.35)',
+        }}
+      >
         {page === 'landing' ? (
           /* Landing: just the logo */
           <div className="page-container flex items-center h-11">
@@ -185,7 +191,7 @@ export default function App() {
               <button
                 onClick={() => navigate('landing')}
                 className="text-xs font-semibold tracking-[0.12em] uppercase text-[#1D1D1F] pr-6 flex items-center"
-                style={{ borderRight: '1px solid #D2D2D7' }}
+                style={{ borderRight: '1px solid rgba(224, 217, 203, 0.5)' }}
               >
                 User OS
               </button>
@@ -205,12 +211,12 @@ export default function App() {
                       {/* Label row */}
                       <div className="flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                          background: isActive ? '#0071E3' : isDone ? '#6E6E73' : '#D2D2D7',
+                          background: isActive ? '#127A74' : isDone ? '#6E6E73' : '#D2D2D7',
                         }} />
                         <span
                           className="text-[11px] font-medium"
                           style={{
-                            color: isActive ? '#0071E3' : isDone ? '#1D1D1F' : '#D2D2D7',
+                            color: isActive ? '#127A74' : isDone ? '#1D1D1F' : '#D2D2D7',
                             transition: 'color 0.24s cubic-bezier(0.4,0,0.6,1)',
                           }}
                         >
@@ -218,12 +224,12 @@ export default function App() {
                         </span>
                       </div>
                       {/* Bar — full width of this flex cell */}
-                      <div className="h-px w-full overflow-hidden" style={{ background: '#F5F5F7' }}>
+                      <div className="h-px w-full overflow-hidden" style={{ background: '#EDE9E0' }}>
                         <div
                           className="h-full transition-all duration-500"
                           style={{
                             width:      isDone || isActive ? '100%' : '0%',
-                            background: isActive ? '#0071E3' : '#6E6E73',
+                            background: isActive ? '#127A74' : '#6E6E73',
                             opacity:    isDone ? 0.4 : isActive ? 1 : 0,
                           }}
                         />
