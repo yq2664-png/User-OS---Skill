@@ -14,11 +14,65 @@ The skill runs entirely in the model. No API key, no server. You describe a prod
 
 ## Install
 
+### Codex (CLI / IDE / ChatGPT desktop)
+
+Codex discovers skills from folders containing `SKILL.md`. This repo ships the skill at the root — install it as a **skill directory**, not as a loose file.
+
+#### Option A — Install from GitHub (recommended)
+
+In a Codex session, ask the installer to pull this repo:
+
+```text
+$skill-installer install https://github.com/yq2664-png/User-OS---Skill
+```
+
+If the skill does not appear, restart Codex. Then verify with `/skills` or invoke directly:
+
+```text
+$user-research-os Do pre-launch user research on [product name].
+```
+
+#### Option B — Install manually (global)
+
+Clone the repo and copy the skill into your user skills folder:
+
+```bash
+git clone https://github.com/yq2664-png/User-OS---Skill.git
+mkdir -p ~/.agents/skills/user-research-os
+cp User-OS---Skill/SKILL.md ~/.agents/skills/user-research-os/
+cp -R User-OS---Skill/references ~/.agents/skills/user-research-os/
+```
+
+Restart Codex if needed. The skill is available in any repo you open.
+
+#### Option C — Install in a project (team-shared)
+
+Check the skill into a repo so everyone on the team gets the same workflow:
+
+```bash
+mkdir -p .agents/skills/user-research-os
+cp SKILL.md .agents/skills/user-research-os/
+cp -R references .agents/skills/user-research-os/
+git add .agents/skills/user-research-os
+```
+
+Codex scans `.agents/skills` from your current working directory up to the repo root.
+
+#### Using the skill in Codex
+
+| Method | Example |
+|---|---|
+| Explicit | `$user-research-os How would users react to this onboarding?` |
+| Picker | Type `/skills` and select **user-research-os** |
+| Implicit | Ask naturally: "Do pre-launch user research on this feature" — Codex matches from the skill `description` |
+
+Keep `references/` next to `SKILL.md`. Codex reads those files when running each phase.
+
 ### Cursor
 
 1. Download or clone this repository.
-2. Copy `SKILL.md` into your Cursor skills folder, or add this repo as a skill source.
-3. Copy the `references/` folder alongside it — the skill reads these files during each phase.
+2. Create `.cursor/skills/user-research-os/` in your project (or `~/.cursor/skills/user-research-os/` for global use).
+3. Copy `SKILL.md` and the `references/` folder into that directory.
 
 ### Claude / other LLMs
 
@@ -63,6 +117,17 @@ references/
   reasoning.md            # Phase 3 schema (deep path)
   review.md               # Phase 4 schema (deep path)
   decisions.md            # Phase 5 schema
+```
+
+Installed layout for Codex / Cursor:
+
+```
+.agents/skills/user-research-os/     # Codex (project)
+~/.agents/skills/user-research-os/   # Codex (global)
+.cursor/skills/user-research-os/      # Cursor
+  SKILL.md
+  references/
+    ...
 ```
 
 ## Example prompts
