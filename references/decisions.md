@@ -1,11 +1,17 @@
-# Phase 3 — Product Decisions
+# Phase 5 — Product Decisions
 
-Act as a principal product strategist. Translate the Phase 2 insights into a focused
-set of product decisions, each grounded in the behavioral research.
+Act as a principal product strategist. Translate the behavioral research into a
+focused set of product decisions, each grounded in user evidence.
+
+On the **standard path**, decisions trace: User Evidence → Behavioral Insight → Product Requirement.
+
+On the **deep path**, decisions trace: User Evidence → Behavioral Insight → Design Framework Principle → Product Requirement.
 
 ## What to generate
 
 **5–6 decisions**, sorted by `priority` descending (Critical first).
+
+On the deep path, at least 3 decisions should connect to findings from Review.
 
 ## Per-decision fields
 
@@ -21,6 +27,9 @@ set of product decisions, each grounded in the behavioral research.
 | `userStory` | "When a user is [behavioral state], they need [capability] so they can [outcome]." Reference a **behavioral state**, not a demographic role. |
 | `requirement` | Clear, testable product requirement addressing the problem. |
 | `successMetric` | Measurable outcome signaling the **behavior has changed** — not just a feature-shipped metric. |
+| `userEvidence` | Direct quote or observable behavior from Phase 1 that supports this decision. |
+| `behavioralInsight` | Exact insight title or finding this decision addresses. |
+| `relatedHeuristic` | *(deep path)* Design framework principle from Review (Nielsen, WCAG, HIG, Material, Cognitive Load, or Trust). Omit or set to `"—"` on standard path. |
 
 ## Quality bar
 
@@ -29,9 +38,12 @@ set of product decisions, each grounded in the behavioral research.
   justify continuing."
 - `successMetric` — **Bad:** "Ship onboarding tooltips." **Good:** "% of new users
   reaching first meaningful action within one session rises from X to Y."
+- `userEvidence` — **Bad:** "Users are frustrated." **Good:** A specific quote or
+  behavior from a named perspective.
 
 Every decision must cite the insight(s) it answers. If the research only weakly
-supports a decision, lower its `confidence` rather than overstating it.
+supports a decision, lower its `confidence` rather than overstating it. Do not
+invent problems not supported by the research.
 
 ## JSON schema (only if the user asks for JSON)
 
@@ -49,12 +61,15 @@ supports a decision, lower its `confidence` rather than overstating it.
       "problem": "...",
       "userStory": "When a user is [state], they need [capability] so they can [outcome]",
       "requirement": "...",
-      "successMetric": "..."
+      "successMetric": "...",
+      "userEvidence": "Direct quote or observable behavior",
+      "behavioralInsight": "Exact insight title",
+      "relatedHeuristic": "Design framework principle (deep path only)"
     }
   ]
 }
 ```
 
 Default human-readable presentation: a prioritized table (name · priority · impact ·
-confidence · effort) with an expandable block per decision showing problem / user
-story / requirement / success metric.
+confidence · effort) with an expandable block per decision showing the evidence
+chain (user evidence → insight → [principle] → requirement) and success metric.

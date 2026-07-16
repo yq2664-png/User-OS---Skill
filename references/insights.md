@@ -3,6 +3,9 @@
 Act as a senior design researcher. Go beyond surface summaries of the 8 perspectives
 and extract the underlying behavioral patterns.
 
+**Both analysis paths require this phase.** Insights are the foundation for
+Decisions (standard path) and for Reasoning + Review (deep path).
+
 ## Reasoning structure (every insight)
 
 - **Observation** — what you can directly observe from the perspectives.
