@@ -1,20 +1,16 @@
 ---
 name: user-research-os
-description: Simulate how multiple distinct users would react to a product before real users ever speak, then synthesize behavioral insights and concrete product decisions. Use whenever someone wants pre-launch user research, wants to pressure-test a product idea, asks "how would users react to X", needs a research-backed PRD, or wants to find friction / hidden needs / trust issues in a product or feature. Supports a standard path (Perspectives → Insights → Decisions) or a deep path that adds Reasoning and multi-framework Review before Decisions.
+description: Simulate how multiple distinct users would react to a product before real users ever speak, then synthesize behavioral insights and concrete product decisions. Use whenever someone wants pre-launch user research, wants to pressure-test a product idea, asks "how would users react to X", needs a research-backed PRD, or wants to find friction / hidden needs / trust issues in a product or feature. Runs Perspectives (including UX Expert Perspective) → Insights → Reasoning → Decisions.
 ---
 
 # User Research OS
 
 Turn a product description into research artifacts, in order:
 
-1. **Behavioral Perspectives** — 8 distinct users react in their own voice.
-2. **Behavioral Insights** — the patterns and friction underneath those reactions.
-3. **Product Decisions** — a prioritized, evidence-backed set of moves.
-
-**Deep analysis** adds two phases between Insights and Decisions:
-
-4. **Reasoning** — explicit evidence chains linking perspectives to insights.
-5. **Review** — multi-framework design evaluation grounded in that evidence.
+1. **Perspectives** — user perspectives + UX Expert Perspective findings.
+2. **Insights** — behavioral patterns underneath that evidence.
+3. **Reasoning** — explicit chains combining user evidence, behavior patterns, and UX findings.
+4. **Decisions** — prioritized, evidence-backed product moves.
 
 This is a design-research reasoning workflow. It runs entirely in the model — no
 API, no server. The value is in the *rigor*: reactions must reveal motivation,
@@ -48,57 +44,59 @@ biggest gap, then proceed. Don't interrogate.
 For local or code-based projects, read the repo or docs the user provides before
 generating perspectives — the skill is designed to work from real project context.
 
-## Choose analysis depth
-
-After Phase 1 (Perspectives), ask which path the user wants — or infer from their
-request:
-
-| Path | When to use | Phases |
-|---|---|---|
-| **Standard** | Fast turnaround; decisions from insights alone | Perspectives → Insights → Decisions |
-| **Deep** | Design critique, heuristic audit, or evidence chains needed | Perspectives → Insights → Reasoning → Review → Decisions |
-
-Both paths **require Insights**. Never skip from Perspectives straight to Decisions.
-
-Default to **Standard** unless the user asks for design review, heuristic
-evaluation, reasoning chains, or UX audit language.
-
 ## Workflow
 
 Run phases **in order**. Each phase's output feeds the next. Read the matching
 reference file at the start of each phase — the exact schema, quality bar, and
 worked examples live there.
 
-### Phase 1 — Behavioral Perspectives
-Read `references/perspectives.md`. Generate 8 perspective cards. Present them, then
-continue (or pause if the user wants to edit the set).
+```
+Perspectives
+  (User Perspectives + UX Expert Perspective)
+    ↓
+Insights
+    ↓
+Reasoning
+  (User Evidence + Behavior Patterns + UX Findings)
+    ↓
+Decisions
+  (based on Insights + Reasoning + UX Findings)
+```
+
+### Phase 1 — Perspectives
+Read `references/perspectives.md` and `references/ux-expert-perspective.md`.
+
+1. Generate **8 user perspective cards**.
+2. Generate **UX Expert Perspective** key findings (Nielsen-based analysis of the
+   product itself — location-level UX issues presented as findings, not a product
+   score or overall conclusion).
+3. Present both. Pause if the user wants to edit the set.
 
 ### Phase 2 — Behavioral Insights
-Read `references/insights.md`. Synthesize the 8 perspectives into ranked insights
-across five categories. Present them.
+Read `references/insights.md`. Synthesize user perspectives **and** UX Expert
+findings into ranked insights across five categories. Present them.
 
-### Phase 3 — Reasoning *(deep path only)*
-Read `references/reasoning.md`. Trace 3–5 explicit evidence chains from user
-perspectives through behavioral insights to underlying patterns. Present the
-synthesis and threads.
+### Phase 3 — Reasoning
+Read `references/reasoning.md`. Trace 3–5 evidence chains that combine:
+- User evidence
+- Behavior patterns (from Insights)
+- UX findings (from UX Expert Perspective)
 
-### Phase 4 — Review *(deep path only)*
-Read `references/review.md`. Evaluate the product through applicable UX frameworks
-(Nielsen, WCAG, Apple HIG, Material, Cognitive Load, Trust). Only include
-frameworks with evidence-backed findings. Present findings grouped by framework.
+Present the synthesis and threads.
 
-### Phase 5 — Product Decisions
+### Phase 4 — Product Decisions
 Read `references/decisions.md`. Translate the research into 5–6 prioritized
-product decisions. On the deep path, each decision must also connect to a design
-framework principle from Review.
+product decisions grounded in Insights + Reasoning + UX Findings. Each decision
+should cite user evidence, a behavioral insight, and a UX principle when available.
 
 ## Output style
 
 - Default to **readable Markdown** (tables, headers) for a human reader.
 - If the user asks for JSON or wants to pipe it into another tool, emit the exact
   JSON schemas defined in the reference files instead.
-- Never invent data. Every insight cites a perspective; every decision cites an
-  insight. If evidence is thin, say so and lower the confidence.
+- Never invent data. Every insight cites evidence; every decision cites an insight
+  (and UX finding when relevant). If evidence is thin, say so and lower the
+  confidence.
 
 ## The one rule that matters
 

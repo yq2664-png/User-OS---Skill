@@ -90,33 +90,38 @@ For local or code-based projects, point the model at your repo or design docs wh
 
 After you provide a product name and description, the skill runs phases in order:
 
+```
+Perspectives
+  (User Perspectives + UX Expert Perspective)
+    ↓
+Insights
+    ↓
+Reasoning
+  (User Evidence + Behavior Patterns + UX Findings)
+    ↓
+Decisions
+  (Insights + Reasoning + UX Findings)
+```
+
 | Phase | Output |
 |---|---|
-| **Perspectives** | 8 distinct user reactions revealing motivation and mental models |
+| **Perspectives** | 8 user reactions + UX Expert Perspective key findings |
 | **Insights** | Ranked behavioral patterns across frustrations, hidden needs, trust issues, and more |
-| **Reasoning** *(deep path)* | Evidence chains linking perspectives → insights → patterns |
-| **Review** *(deep path)* | Multi-framework design evaluation (Nielsen, WCAG, HIG, Material, Cognitive Load, Trust) |
+| **Reasoning** | Evidence chains combining user evidence, behavior patterns, and UX findings |
 | **Decisions** | 5–6 prioritized product decisions with requirements and success metrics |
 
-### Choose your depth
-
-| Path | Phases | Best for |
-|---|---|---|
-| **Standard** | Perspectives → Insights → Decisions | Fast turnaround |
-| **Deep** | Perspectives → Insights → Reasoning → Review → Decisions | Design critique, heuristic audit, evidence chains |
-
-Both paths require **Insights**. The skill will not skip straight from Perspectives to Decisions.
+There is **one linear path**. Do not skip Insights or Reasoning.
 
 ## Repository structure
 
 ```
 SKILL.md                  # Main skill instructions — install this
 references/
-  perspectives.md         # Phase 1 schema and quality bar
-  insights.md             # Phase 2 schema and quality bar
-  reasoning.md            # Phase 3 schema (deep path)
-  review.md               # Phase 4 schema (deep path)
-  decisions.md            # Phase 5 schema
+  perspectives.md              # Phase 1a — user perspective cards
+  ux-expert-perspective.md     # Phase 1b — UX Expert Perspective findings
+  insights.md                  # Phase 2
+  reasoning.md                 # Phase 3
+  decisions.md                 # Phase 4
 ```
 
 Installed layout for Codex / Cursor:
@@ -135,7 +140,7 @@ Installed layout for Codex / Cursor:
 - "How would users react to this onboarding flow?"
 - "Do pre-launch user research on [product name]."
 - "What friction and trust issues does this feature have?"
-- "Run deep analysis — I want reasoning chains and a design review before decisions."
+- "Run the full User Research OS workflow through decisions."
 
 ## When to use the web app instead
 

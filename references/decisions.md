@@ -1,17 +1,25 @@
-# Phase 5 — Product Decisions
+# Phase 4 — Product Decisions
 
 Act as a principal product strategist. Translate the behavioral research into a
-focused set of product decisions, each grounded in user evidence.
+focused set of product decisions, each grounded in evidence.
 
-On the **standard path**, decisions trace: User Evidence → Behavioral Insight → Product Requirement.
+Generate decisions from:
+1. **Insights**
+2. **Reasoning** (user evidence + behavior patterns + UX findings)
+3. **UX Expert Perspective** findings
 
-On the **deep path**, decisions trace: User Evidence → Behavioral Insight → Design Framework Principle → Product Requirement.
+Every decision traces:
+
+```
+User Evidence → Behavioral Insight → UX Principle → Product Requirement
+```
 
 ## What to generate
 
 **5–6 decisions**, sorted by `priority` descending (Critical first).
 
-On the deep path, at least 3 decisions should connect to findings from Review.
+Prefer decisions supported by Insights + Reasoning + UX Findings together.
+At least 3 decisions should connect to a UX principle from UX Expert Perspective.
 
 ## Per-decision fields
 
@@ -27,9 +35,9 @@ On the deep path, at least 3 decisions should connect to findings from Review.
 | `userStory` | "When a user is [behavioral state], they need [capability] so they can [outcome]." Reference a **behavioral state**, not a demographic role. |
 | `requirement` | Clear, testable product requirement addressing the problem. |
 | `successMetric` | Measurable outcome signaling the **behavior has changed** — not just a feature-shipped metric. |
-| `userEvidence` | Direct quote or observable behavior from Phase 1 that supports this decision. |
+| `userEvidence` | Direct quote or observable behavior from Perspectives that supports this decision. |
 | `behavioralInsight` | Exact insight title or finding this decision addresses. |
-| `relatedHeuristic` | *(deep path)* Design framework principle from Review (Nielsen, WCAG, HIG, Material, Cognitive Load, or Trust). Omit or set to `"—"` on standard path. |
+| `relatedHeuristic` | UX principle name from UX Expert Perspective (e.g. "Recognition Rather Than Recall") — no Nielsen numbers. |
 
 ## Quality bar
 
@@ -64,7 +72,7 @@ invent problems not supported by the research.
       "successMetric": "...",
       "userEvidence": "Direct quote or observable behavior",
       "behavioralInsight": "Exact insight title",
-      "relatedHeuristic": "Design framework principle (deep path only)"
+      "relatedHeuristic": "Recognition Rather Than Recall"
     }
   ]
 }
@@ -72,4 +80,4 @@ invent problems not supported by the research.
 
 Default human-readable presentation: a prioritized table (name · priority · impact ·
 confidence · effort) with an expandable block per decision showing the evidence
-chain (user evidence → insight → [principle] → requirement) and success metric.
+chain (user evidence → insight → UX principle → requirement) and success metric.

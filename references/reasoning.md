@@ -1,11 +1,15 @@
-# Phase 3 — Reasoning *(deep path only)*
+# Phase 3 — Reasoning
 
 Act as a senior UX researcher. This phase is the **reasoning bridge** between raw
-user reactions and design action. Trace explicit connections — do not invent links
+evidence and product decisions. Trace explicit connections — do not invent links
 without evidence.
 
-Run this phase only on the **deep analysis** path, after Behavioral Insights and
-before Review.
+**Required phase.** Run after Behavioral Insights and before Product Decisions.
+
+Combine three sources in every thread when possible:
+1. **User Evidence** — from Perspectives
+2. **Behavior Patterns** — from Insights
+3. **UX Findings** — from UX Expert Perspective
 
 ## What to generate
 
@@ -22,13 +26,14 @@ before Review.
 | `userEvidence` | Observable quote or behavior from that perspective — must be traceable. |
 | `behavioralInsight` | The supporting insight finding, paraphrased from Phase 2. |
 | `insightTitle` | Exact `title` from the insight this thread supports. |
+| `uxFinding` | Title or finding text from UX Expert Perspective when it supports the thread; omit or `""` if none. |
 | `pattern` | Underlying behavioral pattern in one sentence. |
 | `confidence` | Integer 0–100 — strength of the evidence chain. |
 
 ## Chain structure (every thread)
 
 ```
-User Perspective → Observable Evidence → Behavioral Insight → Underlying Pattern
+User Evidence → Behavior Pattern → UX Finding (when relevant) → Underlying Pattern
 ```
 
 ## Quality bar
@@ -38,8 +43,9 @@ User Perspective → Observable Evidence → Behavioral Insight → Underlying P
 - **Bad pattern:** "Users don't like complexity." (restates the insight)
 - **Good pattern:** "Setup cost is evaluated before feature value is proven." (reusable principle)
 
-Every thread must connect a **specific perspective** to a **specific insight title**.
-If you cannot trace the link, drop the thread rather than forcing it.
+Prefer threads that connect all three sources. Every thread must connect a
+**specific perspective** to a **specific insight title**. If you cannot trace the
+link, drop the thread rather than forcing it.
 
 ## JSON schema (only if the user asks for JSON)
 
@@ -54,6 +60,7 @@ If you cannot trace the link, drop the thread rather than forcing it.
       "userEvidence": "Observable quote or behavior",
       "behavioralInsight": "The supporting insight finding",
       "insightTitle": "Exact insight title",
+      "uxFinding": "Onboarding Complexity — users struggle to know where to start",
       "pattern": "Underlying behavioral pattern",
       "confidence": 90
     }
@@ -62,5 +69,5 @@ If you cannot trace the link, drop the thread rather than forcing it.
 ```
 
 Default human-readable presentation: the synthesis as a lead sentence, then each
-thread as a vertical chain (Perspective → Evidence → Insight → Pattern) with
-confidence shown per thread.
+thread as a vertical chain (User Evidence → Behavior Pattern → UX Finding → Pattern)
+with confidence shown per thread.

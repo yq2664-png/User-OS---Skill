@@ -1,8 +1,12 @@
-# Phase 1 — Behavioral Perspectives
+# Phase 1a — Behavioral Perspectives
 
 Simulate authentic user perspectives for the product. Reveal **why** users behave
 a certain way — their motivations, fears, mental models, assumptions — not **who**
 they are demographically.
+
+This phase has two outputs that travel together into Insights:
+1. **User Perspectives** (this file)
+2. **UX Expert Perspective** (`ux-expert-perspective.md`)
 
 ## What to generate
 
@@ -67,6 +71,8 @@ anything. Drop or rewrite any card that:
 
 Only present the 8 that survive. Never show the rejects or the filtering process —
 just the clean final set.
+
+Then continue to UX Expert Perspective (`ux-expert-perspective.md`) before Insights.
 
 ## JSON schema (only if the user asks for JSON)
 

@@ -1,14 +1,19 @@
 # Phase 2 — Behavioral Insights
 
-Act as a senior design researcher. Go beyond surface summaries of the 8 perspectives
-and extract the underlying behavioral patterns.
+Act as a senior design researcher. Go beyond surface summaries and extract the
+underlying behavioral patterns.
 
-**Both analysis paths require this phase.** Insights are the foundation for
-Decisions (standard path) and for Reasoning + Review (deep path).
+**Required phase.** Insights are the foundation for Reasoning and Decisions.
+
+Synthesize from both Perspective outputs:
+1. User Perspectives (Phase 1a)
+2. UX Expert Perspective findings (Phase 1b)
+
+When UX findings reinforce user perspectives, prioritize those patterns.
 
 ## Reasoning structure (every insight)
 
-- **Observation** — what you can directly observe from the perspectives.
+- **Observation** — what you can directly observe from the perspectives and/or UX findings.
 - **Interpretation** — what this behavior means (the "why").
 - **Behavioral Insight** — a sharp, reusable design principle.
   - e.g. "Power appears before value", "Flexibility creates decision paralysis",
@@ -43,8 +48,8 @@ Produce insights across these five arrays. Each array holds **3–4 items**, sor
 - **Bad:** "Users are confused."
 - **Good:** "Complexity is tolerated only after value is proven."
 
-Every insight must be traceable to at least one Phase 1 perspective. Don't introduce
-patterns the perspectives don't support.
+Every insight must be traceable to at least one Phase 1 perspective or UX finding.
+Don't introduce patterns the evidence doesn't support.
 
 ## JSON schema (only if the user asks for JSON)
 
