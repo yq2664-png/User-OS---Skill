@@ -17,6 +17,12 @@ Combine three sources in every thread when possible:
   takeaway. No lists, no repetition of thread details.
 - **3–5 threads** — evidence chains sorted by `confidence` descending.
 
+## Chain structure (every thread)
+
+```
+User Evidence → Behavioral Insight → UX Finding → Design Implication
+```
+
 ## Per-thread fields
 
 | Field | Rule |
@@ -26,15 +32,9 @@ Combine three sources in every thread when possible:
 | `userEvidence` | Observable quote or behavior from that perspective — must be traceable. |
 | `behavioralInsight` | The supporting insight finding, paraphrased from Phase 2. |
 | `insightTitle` | Exact `title` from the insight this thread supports. |
-| `uxFinding` | Title or finding text from UX Expert Perspective when it supports the thread; omit or `""` if none. |
-| `pattern` | Underlying behavioral pattern in one sentence. |
+| `uxFinding` | Title or finding text from UX Expert Perspective; if none applies, write a short UX finding grounded in the same evidence. |
+| `pattern` | **Design implication** — what this means for product/design decisions, in one sentence. |
 | `confidence` | Integer 0–100 — strength of the evidence chain. |
-
-## Chain structure (every thread)
-
-```
-User Evidence → Behavior Pattern → UX Finding (when relevant) → Underlying Pattern
-```
 
 ## Quality bar
 
